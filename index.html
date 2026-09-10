@@ -77,6 +77,9 @@ html[data-motion="off"]{scroll-behavior:auto}html[data-motion="off"] *,html[data
 @media(max-width:620px){.sheet-privacy{display:block;padding:17px}.sheet-privacy p{margin-top:9px}.sheet-toolbar{flex-wrap:wrap}.sheet-toolbar .btn,.sheet-edit-actions .btn{font-size:11px;padding:8px 10px}.sheet-day-head{align-items:flex-start;gap:12px;flex-wrap:wrap}.sheet-day-head h3{font-size:25px}.sheet-zone-label{width:100%;gap:5px}.sheet-edit-actions{align-items:flex-start;flex-direction:column}.sheet-entry{padding:15px 12px}.sheet-main-grid{grid-template-columns:1fr}.sheet-field input,.sheet-field select,.sheet-field textarea{font-size:16px}.sheet-notes-grid{grid-template-columns:1fr;gap:5px}.sheet-map-link{justify-self:start}.sheet-clock{font-size:9px}.sheet-overview{padding:14px 11px}.sheet-entry-head{gap:8px}.sheet-entry-head button{font-size:10px;padding:5px 8px}.sheet-entry-head .sheet-state{font-size:10px}.sheet-save{font-size:11px}}
 @media print{.sheet-toolbar,.sheet-edit-actions,.sheet-row-actions,.sheet-map-link,.sheet-days,#sheet-conflict{display:none!important}.sheet-entry{break-inside:avoid}.sheet-field input,.sheet-field select,.sheet-field textarea{font-size:10px;border:0;min-height:0;padding:3px}.sheet-privacy{font-size:10px}.sheet-entry{padding:12px}.sheet-time-grid{grid-template-columns:repeat(5,1fr)}}
 
+
+.section-memo{margin-top:30px;border:1px solid #cbd5c6;border-radius:6px;background:linear-gradient(120deg,#fffdf4,#f1f1e5);overflow:hidden}.section-memo>summary{display:flex;align-items:center;gap:12px;padding:16px 20px;list-style:none;margin:0!important;color:var(--sea)}.section-memo>summary::-webkit-details-marker{display:none}.memo-pencil{width:29px;height:29px;display:grid;place-items:center;background:#e1ebdd;border-radius:50%;flex-shrink:0}.memo-pencil svg{width:15px;height:15px}.memo-summary-text{font-size:13px;flex:1}.memo-summary-text small{display:block;font-size:10px;font-weight:400;color:var(--muted);margin-top:2px}.memo-badge{font-size:10px;color:var(--muted);font-weight:400}.memo-chevron{font:22px Georgia,serif;transition:rotate .2s}.section-memo[open] .memo-chevron{rotate:45deg}.section-memo.has-note{border-color:#7eab92}.section-memo.has-note .memo-badge{color:var(--sea);font-weight:700}.memo-body{padding:0 20px 20px}.memo-body>label{display:block;font-size:12px;margin-bottom:8px;color:var(--muted)}.memo-body textarea{width:100%;resize:vertical;min-height:130px;padding:14px 15px;border:1px solid #bccbb8;border-radius:4px;background:repeating-linear-gradient(transparent 0 27px,#124d4b09 28px),#fffef9;color:var(--ink);font:14px/28px var(--body)}.memo-meta{display:flex;justify-content:space-between;gap:15px;margin-top:6px;font-size:10px;color:var(--muted)}.memo-status.is-error{color:#a1442b}.memo-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:13px}.memo-actions button{font-size:11px;padding:7px 11px}.memo-actions a{margin-left:auto;font-size:11px}.memo-conflict{margin-top:12px;padding:12px;background:#f6e5d5;color:#8f462c;font-size:12px}.memo-conflict button{display:block;margin-top:9px}.memo-hub{padding:23px;background:#e4ece1;border:1px solid #c5d4bf;border-radius:6px;margin:0 0 25px}.memo-hub h3{font-size:19px}.memo-hub p{font-size:12px;color:var(--muted);margin-top:9px}.memo-hub .actions{margin-top:15px}.memo-hub .btn{font-size:11px}.memo-hub details{margin-top:16px;border-top:1px solid #bcccba;padding-top:13px}.memo-hub details summary{font-size:12px}.memo-share-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:13px}.memo-share-options>div{background:#fffef7;padding:16px;border:1px solid #d6ddcd}.memo-share-options b{font-size:13px}.memo-share-options a{font-size:11px}.memo-hub-status{min-height:18px;color:var(--sea)!important}.memo-hub-status.is-error{color:#a1442b!important}@media(max-width:620px){.section-memo>summary{padding:15px 13px;gap:8px}.memo-body{padding:0 13px 16px}.memo-body textarea{font-size:16px}.memo-meta{flex-wrap:wrap;gap:5px}.memo-summary-text{font-size:12px}.memo-badge{font-size:9px}.memo-actions a{margin-left:0;width:100%}.memo-hub{padding:18px}.memo-share-options{grid-template-columns:1fr}}@media print{.section-memo{display:none!important}.memo-hub{display:none!important}}
+
 </style>
 </head>
 <body>
@@ -872,6 +875,88 @@ activityTripUpdate();
  window.addEventListener('storage',event=>{if(event.key!==KEY&&event.key!==null)return;blocked=true;external=event.newValue;$('sheet-conflict').hidden=false;setStatus('다른 탭의 변경을 감지했습니다. 이 탭의 자동 저장을 중지했습니다.',true);});
  $('sheet-use-external').addEventListener('click',()=>{if(!confirm('이 탭의 미저장 편집을 버리고 다른 탭 내용으로 전환할까요? 필요하면 먼저 JSON 백업을 내려받으세요.'))return;try{data=external?validate(JSON.parse(external)):initial();blocked=false;$('sheet-conflict').hidden=true;setStatus('다른 탭의 내용을 적용했습니다. 다음 편집부터 자동 저장됩니다.');render();}catch(error){setStatus('다른 탭 데이터를 적용하지 못했습니다. 현재 내용을 백업한 뒤 파일 불러오기를 이용하세요.',true);}});
  render();
+})();
+</script>
+
+
+<script>
+(function initSectionNotes(){
+ 'use strict';
+ const PREFIX='australia-section-note-v1:',MAX=12000;
+ const sections=Array.from(document.querySelectorAll('main section.section[id]'));
+ const entries=new Map();
+ function node(tag,className,text){const element=document.createElement(tag);if(className)element.className=className;if(text!==undefined)element.textContent=text;return element;}
+ const hub=node('div','memo-hub');hub.id='section-notes-tools';
+ hub.innerHTML='<h3>섹션마다, 놓치고 싶지 않은 메모.</h3><p>각 섹션 끝의 메모장을 펼쳐 질문·할 일·아이디어를 적어두세요. 누구나 자기 브라우저에 메모할 수 있지만 <b>다른 사람에게 자동으로 보이지는 않습니다.</b> 아래 파일 기능으로 서로의 메모를 주고받을 수 있습니다. 일정 시트 JSON과 메모 JSON은 서로 다른 파일입니다.</p><div class="actions"><button class="btn primary" type="button" data-memo-tool="export">전체 메모 백업 · JSON</button><button class="btn" type="button" data-memo-tool="import">받은 메모 덧붙여 불러오기</button><button class="btn" type="button" data-memo-tool="open">메모장 모두 펼치기</button><button class="btn" type="button" data-memo-tool="close">모두 접기</button></div><p class="memo-hub-status" role="status" aria-live="polite">개인 메모는 이 브라우저에만 저장되며 공개 사이트로 전송되지 않습니다.</p><details id="memo-sharing"><summary>다른 사람과 함께 보는 온라인 메모는 어떻게 연결하나요?</summary><div class="memo-share-options"><div><b>초대 전용 공유 메모 · 추천</b><p>로그인과 초대 멤버 확인을 거쳐 섹션별 메모를 함께 저장·열람하는 방식. 별도 저장 서비스와 접근 권한 설정이 필요합니다. 현재는 연결되지 않았습니다.</p><a href="https://supabase.com/docs/guides/database/postgres/row-level-security" target="_blank" rel="noopener noreferrer">접근 권한 기능 참고</a></div><div><b>GitHub 로그인 · 공개 댓글</b><p>giscus를 연결하면 GitHub 계정으로 섹션별 댓글을 남길 수 있습니다. 댓글은 공개 저장소의 Discussions에 보관되므로 예약번호·연락처·개인 일정은 적지 않는 방식이 적합합니다. 현재 미연결입니다.</p><a href="https://giscus.app/" target="_blank" rel="noopener noreferrer">giscus 공식 안내</a></div></div><p>현재 호스팅인 GitHub Pages는 정적 사이트 서비스입니다. 공용 메모 저장·로그인·권한 관리는 별도 기능을 연결해야 합니다. 공유 방식 선택 전에는 개인 메모를 자동 공개하지 않습니다. <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages" target="_blank" rel="noopener noreferrer">GitHub Pages 안내</a></p></details>';
+ const overview=document.getElementById('travel-overview');const heading=overview&&overview.querySelector('.section-head');if(heading)heading.after(hub);else if(sections[0])sections[0].prepend(hub);
+ const hubStatus=hub.querySelector('.memo-hub-status'),file=node('input');file.type='file';file.accept='.json,application/json';file.hidden=true;hub.append(file);
+ function hubMessage(text,error=false){hubStatus.textContent=text;hubStatus.classList.toggle('is-error',error);}
+ function parse(raw){if(raw===null)return {text:'',updatedAt:''};const value=JSON.parse(raw);if(!value||typeof value.text!=='string'||value.text.length>MAX)throw new Error('메모 형식 오류');return {text:value.text,updatedAt:typeof value.updatedAt==='string'?value.updatedAt:''};}
+ function paint(entry){const length=entry.input.value.length;entry.count.textContent=length.toLocaleString('ko-KR')+' / '+MAX.toLocaleString('ko-KR')+'자';entry.details.classList.toggle('has-note',Boolean(entry.input.value.trim()));entry.badge.textContent=entry.input.value.trim()?'메모 있음':'개인 메모';}
+ function message(entry,text,error=false){entry.status.textContent=text;entry.status.classList.toggle('is-error',error);}
+ function save(entry){
+  paint(entry);if(entry.blocked){message(entry,'자동 저장 중지. 현재 메모를 백업한 뒤 다른 탭 변경 또는 저장 오류를 처리하세요.',true);return false;}
+  try{const updatedAt=new Date().toISOString();localStorage.setItem(PREFIX+entry.id,JSON.stringify({text:entry.input.value,updatedAt}));entry.updatedAt=updatedAt;message(entry,'자동 저장됨 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));return true;}
+  catch(error){message(entry,'브라우저 저장 실패. 전체 메모 백업 또는 복사를 이용하세요.',true);return false;}
+ }
+ for(const section of sections){
+  const id=section.id,heading=section.querySelector('h2');const link=document.querySelector('nav a[href="#'+id+'"]');const title=link?link.textContent:heading?heading.textContent:'이 섹션';
+  const details=node('details','section-memo');details.id='memo-'+id;
+  const summary=node('summary');summary.innerHTML='<span class="memo-pencil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20l4-1 12-12-3-3L5 16zM14 7l3 3M4 20h15"/></svg></span>';
+  const summaryText=node('span','memo-summary-text',title+' 메모');summaryText.append(node('small','','나만 보는 메모 · 이 브라우저에 자동 저장'));
+  const badge=node('span','memo-badge','개인 메모');summary.append(summaryText,badge,node('span','memo-chevron','+'));summary.lastChild.setAttribute('aria-hidden','true');details.append(summary);
+  const body=node('div','memo-body'),label=node('label','',title+'에서 기억할 내용');label.htmlFor='memo-input-'+id;
+  const input=node('textarea');input.id=label.htmlFor;input.maxLength=MAX;input.rows=5;input.placeholder='예: 업체에 장비 가방 추가요금 문의하기 / 둘이 다시 비교할 후보 / 예약 전 확인할 사항';
+  const meta=node('div','memo-meta'),status=node('span','memo-status','아직 메모가 없습니다.'),count=node('span','memo-count');status.setAttribute('role','status');status.setAttribute('aria-live','polite');meta.append(status,count);
+  const actions=node('div','memo-actions'),copy=node('button','btn','메모 복사'),clear=node('button','btn','이 메모 비우기'),share=node('a','','함께 보는 메모 연결 방법');copy.type=clear.type='button';share.href='#memo-sharing';actions.append(copy,clear,share);
+  const conflict=node('div','memo-conflict');conflict.hidden=true;const conflictText=node('p','','다른 탭에서 이 섹션 메모를 변경했습니다. 현재 내용을 백업한 뒤 새 내용을 적용하세요.'),useRemote=node('button','btn','다른 탭 메모 적용');useRemote.type='button';conflict.append(conflictText,useRemote);
+  body.append(label,input,meta,conflict,actions);details.append(body);section.append(details);
+  const entry={id,title,details,input,badge,count,status,conflict,blocked:false,external:null,updatedAt:''};entries.set(id,entry);
+  try{const stored=parse(localStorage.getItem(PREFIX+id));input.value=stored.text;entry.updatedAt=stored.updatedAt;if(stored.text)message(entry,'저장된 메모를 불러왔습니다.');}
+  catch(error){entry.blocked=true;message(entry,'저장소 접근 또는 이전 메모 읽기 실패. 원본 보호를 위해 자동 저장하지 않습니다.',true);}
+  paint(entry);
+  input.addEventListener('input',()=>save(entry));
+  copy.addEventListener('click',async()=>{try{if(!navigator.clipboard)throw new Error('clipboard unavailable');await navigator.clipboard.writeText(input.value);message(entry,'클립보드에 복사했습니다.');}catch(error){input.focus();input.select();message(entry,'메모를 선택했습니다. 기기의 복사 기능을 사용하세요.',true);}});
+  clear.addEventListener('click',()=>{if(!confirm('이 섹션의 메모를 비울까요? 다른 섹션의 메모와 일정·예산은 유지됩니다.'))return;input.value='';entry.blocked=false;entry.external=null;conflict.hidden=true;save(entry);});
+  share.addEventListener('click',()=>{hub.querySelector('#memo-sharing').open=true;});
+  useRemote.addEventListener('click',()=>{if(!confirm('이 탭의 메모를 다른 탭의 내용으로 바꿀까요? 필요하면 먼저 복사하거나 백업하세요.'))return;try{const remote=parse(entry.external);input.value=remote.text;entry.updatedAt=remote.updatedAt;entry.blocked=false;conflict.hidden=true;paint(entry);message(entry,'다른 탭 메모를 적용했습니다.');}catch(error){message(entry,'다른 탭의 메모 형식이 잘못되었습니다. 현재 메모는 유지했습니다.',true);}});
+ }
+ function download(){const notes={};for(const [id,entry]of entries)notes[id]={text:entry.input.value,updatedAt:entry.updatedAt};const payload={kind:'australia-section-notes',version:1,exportedAt:new Date().toISOString(),notes};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'}));const anchor=node('a');anchor.href=url;anchor.download='australia-section-notes-'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.json';document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);hubMessage('전체 메모 백업 파일 다운로드를 요청했습니다. 입력한 개인정보도 파일에 포함될 수 있습니다.');}
+ hub.addEventListener('click',event=>{const button=event.target.closest('button[data-memo-tool]');if(!button)return;const action=button.dataset.memoTool;if(action==='export')download();else if(action==='import')file.click();else for(const entry of entries.values())entry.details.open=action==='open';});
+ file.addEventListener('change',async()=>{
+  const selected=file.files&&file.files[0];if(!selected)return;
+  try{
+   if(selected.size>2*1024*1024)throw new Error('2MB 이하의 메모 JSON을 선택하세요.');
+   const value=JSON.parse(await selected.text());
+   if(!value||value.kind!=='australia-section-notes'||value.version!==1||!value.notes||typeof value.notes!=='object'||Array.isArray(value.notes))throw new Error('일정 시트가 아닌 섹션 메모 백업 JSON이 필요합니다.');
+   const pending=[];
+   for(const [id,note]of Object.entries(value.notes)){
+    if(!entries.has(id))throw new Error('현재 사이트에 없는 섹션이 포함되어 있습니다.');
+    if(!note||typeof note.text!=='string'||note.text.length>MAX)throw new Error('메모 형식 또는 길이가 올바르지 않습니다.');
+    if(!note.text.trim())continue;
+    const entry=entries.get(id);
+    if(entry.blocked)throw new Error('충돌 또는 저장 오류가 있는 섹션을 먼저 처리하세요: '+entry.title);
+    const merged=entry.input.value.trim()?entry.input.value+'\n\n[파일에서 받은 메모]\n'+note.text:note.text;
+    if(merged.length>MAX)throw new Error(entry.title+' 메모가 '+MAX+'자를 넘습니다. 기존 메모를 먼저 정리하세요.');
+    pending.push({entry,text:merged});
+   }
+   if(!pending.length){hubMessage('파일에 덧붙일 메모가 없습니다.');return;}
+   if(!confirm(pending.length+'개 섹션에 받은 메모를 덧붙일까요? 기존 메모는 유지됩니다. 같은 파일을 여러 번 불러오면 중복됩니다.'))return;
+   let failed=false;for(const {entry,text}of pending){entry.input.value=text;entry.details.open=true;if(!save(entry))failed=true;}
+   hubMessage(failed?'화면에 메모를 덧붙였지만 일부 브라우저 저장에 실패했습니다. 전체 메모를 다시 백업하세요.':pending.length+'개 섹션에 메모를 덧붙이고 저장했습니다.',failed);
+  }catch(error){hubMessage('불러오기 실패: '+(error instanceof SyntaxError?'JSON 형식이 잘못되었습니다.':error.message)+' 파일 내용은 적용하지 않았습니다.',true);}
+  finally{file.value='';}
+ });
+ window.addEventListener('storage',event=>{
+  if(event.key!==null&&!event.key.startsWith(PREFIX))return;
+  const changed=event.key===null?Array.from(entries.values()):[entries.get(event.key.slice(PREFIX.length))].filter(Boolean);
+  for(const entry of changed){
+   entry.external=event.newValue;
+   if(document.activeElement===entry.input||entry.blocked){entry.blocked=true;entry.conflict.hidden=false;message(entry,'다른 탭 변경 감지. 자동 저장을 멈췄습니다.',true);continue;}
+   try{const remote=parse(event.newValue);entry.input.value=remote.text;entry.updatedAt=remote.updatedAt;paint(entry);message(entry,'다른 탭의 변경을 반영했습니다.');}
+   catch(error){entry.blocked=true;message(entry,'다른 탭의 메모 형식 오류. 자동 저장을 멈췄습니다.',true);}
+  }
+ });
 })();
 </script>
 
