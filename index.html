@@ -104,6 +104,10 @@ html[data-motion="off"]{scroll-behavior:auto}html[data-motion="off"] *,html[data
 @media(max-width:620px){.public-note-card{align-items:flex-start;flex-direction:column;padding:18px}.public-note-card .btn{width:100%;text-align:center}.public-comments-header,.public-comments-body{padding:18px}.public-comments-header h2{font-size:24px}.public-comments-guide{grid-template-columns:1fr}.public-comments-controls{align-items:stretch;flex-direction:column}.public-comments-footer .public-comments-fallback{margin-left:0}}
 @media(prefers-reduced-motion:no-preference){.public-comments-dialog[open]{animation:public-comments-enter .25s ease-out}@keyframes public-comments-enter{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}}
 
+
+/* Always-available recommended itinerary workspace. */
+body{padding-right:86px}.recommend-rail{position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:85;display:flex;flex-direction:column;gap:7px;width:66px;padding:8px 5px;border:1px solid #b9c9be;border-radius:16px;background:#f6f3ebed;box-shadow:0 8px 25px #183a3517;backdrop-filter:blur(12px)}.recommend-rail-label{font-size:10px;line-height:1.4;text-align:center;letter-spacing:.8px;color:var(--muted);padding:5px 0}.recommend-rail button{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;padding:12px 3px;border:0;border-radius:10px;background:var(--sea);color:var(--white);font-size:11px;line-height:1.45}.recommend-rail button+button{background:var(--aqua);color:var(--sea)}.recommend-rail svg{width:23px;height:23px}.recommend-rail button:hover{filter:brightness(1.12)}.recommended-shell{width:calc(100vw - 40px);height:calc(100dvh - 40px);max-width:1600px;max-height:none;margin:auto;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--paper);overflow:hidden;box-shadow:0 30px 100px #102b3255}.recommended-shell::backdrop{background:#153c37d9;backdrop-filter:blur(8px)}.recommended-shell[open]{display:flex;flex-direction:column}.recommended-shell-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid var(--line);background:var(--sea);color:var(--white);font-size:12px}.recommended-shell-bar a{color:var(--white);font-size:11px}.recommended-shell-bar>div{display:flex;align-items:center;gap:15px}.recommended-shell-bar button{padding:6px 13px;color:var(--white);border:1px solid #ffffff60;background:transparent;border-radius:5px;font-size:12px}.recommended-shell iframe{display:block;flex:1;width:100%;min-height:0;border:0;background:var(--paper)}html.recommended-workspace-open{overflow:hidden}@media(max-width:700px){body{padding-right:0;padding-bottom:88px}.recommend-rail{right:12px;bottom:max(12px,env(safe-area-inset-bottom));top:auto;transform:none;flex-direction:row;width:auto;border-radius:14px;padding:5px;gap:5px}.recommend-rail-label{display:none}.recommend-rail button{flex-direction:row;width:auto;gap:7px;padding:10px 12px}.recommend-rail svg{width:20px;height:20px}.recommended-shell{width:100vw;height:100dvh;border:0;border-radius:0}.recommended-shell-bar{padding:8px 10px}.recommended-shell-bar>span{font-size:11px}.recommended-shell-bar a{display:none}}@media print{body{padding:0}.recommend-rail,.recommended-shell{display:none!important}}
+
 </style>
 </head>
 <body>
@@ -1159,6 +1163,46 @@ activityTripUpdate();
    say(message.discussion?'이 섹션에 직접 작성한 댓글은 모두에게 공개됩니다.':'첫 댓글이나 반응을 남기면 이 섹션의 공개 토론이 생성됩니다.');
   }else if(message.resizeHeight){say('댓글 영역에서 GitHub로 로그인해 작성하세요. 직접 게시한 내용은 공개됩니다.');}
  });
+})();
+</script>
+
+
+<aside class="recommend-rail" aria-label="추천 일정 빠른 메뉴">
+ <span class="recommend-rail-label">추천 일정</span>
+ <button type="button" data-recommend-view="grid" aria-haspopup="dialog" aria-controls="recommended-workspace" title="추천 일정을 엑셀형 표로 열기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg><span>일정표</span></button>
+ <button type="button" data-recommend-view="gantt" aria-haspopup="dialog" aria-controls="recommended-workspace" title="추천 일정을 간트차트로 열기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 3v18h17M7 6h7M10 11h10M8 16h8"/><path d="M7 4v4M14 4v4M10 9v4M20 9v4M8 14v4M16 14v4"/></svg><span>간트차트</span></button>
+</aside>
+<dialog id="recommended-workspace" class="recommended-shell" aria-label="추천 여행 일정표와 간트차트">
+ <div class="recommended-shell-bar"><span>추천 일정 · 개인 일정과 별도 저장</span><div><a id="recommended-page-link" href="recommended-itinerary.html" target="_blank" rel="noopener noreferrer">별도 페이지로 열기</a><button type="button" id="recommended-shell-close" autofocus>닫기</button></div></div>
+ <iframe id="recommended-page-frame" title="추천 일정 엑셀형 표 및 간트차트 편집기"></iframe>
+</dialog>
+<script>
+(function initRecommendedWorkspace(){
+ const modal=document.getElementById('recommended-workspace'),frame=document.getElementById('recommended-page-frame');
+ let trigger=null,ready=false;
+ function open(view,button){
+  if(!['grid','gantt'].includes(view))return;
+  trigger=button||document.activeElement;
+  const url='recommended-itinerary.html?view='+view;
+  document.getElementById('recommended-page-link').href=url;
+  if(!modal.open){ready=false;frame.src=url;modal.showModal();document.documentElement.classList.add('recommended-workspace-open');}
+  else frame.contentWindow.postMessage({type:'australia-recommended-view',view},location.protocol==='file:'?'*':location.origin);
+ }
+ function close(){
+  if(ready&&frame.contentWindow)frame.contentWindow.postMessage({type:'australia-recommended-request-close'},location.protocol==='file:'?'*':location.origin);
+  else modal.close();
+ }
+ document.querySelectorAll('[data-recommend-view]').forEach(button=>button.addEventListener('click',()=>open(button.dataset.recommendView,button)));
+ document.getElementById('recommended-shell-close').addEventListener('click',close);
+ modal.addEventListener('cancel',event=>{event.preventDefault();close();});
+ modal.addEventListener('close',()=>{document.documentElement.classList.remove('recommended-workspace-open');ready=false;frame.src='about:blank';if(trigger?.isConnected)trigger.focus({preventScroll:true});});
+ window.addEventListener('message',event=>{
+  if(event.source!==frame.contentWindow||(location.protocol!=='file:'&&event.origin!==location.origin))return;
+  if(event.data?.type==='australia-recommended-ready')ready=true;
+  if(event.data?.type==='australia-recommended-close')modal.close();
+ });
+ function fromHash(){if(location.hash==='#recommended-grid')open('grid');else if(location.hash==='#recommended-gantt')open('gantt');}
+ window.addEventListener('hashchange',fromHash);fromHash();
 })();
 </script>
 
