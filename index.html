@@ -28,20 +28,92 @@ header{border-bottom:1px solid var(--line)}.masthead{display:flex;align-items:ce
 
 .bag-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.bag-metrics>div{padding:23px;background:linear-gradient(135deg,var(--aqua),var(--white));border-top:3px solid var(--sea)}.bag-metrics b{display:block;font:42px var(--serif);margin:14px 0}.bag-metrics small{font:13px var(--body)}.bag-metrics p{font-size:12px;color:var(--muted)}.bag-table{min-width:760px}.bag-table td:first-child{min-width:145px}.bag-inputs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin:22px 0}.bag-result{background:var(--sea);color:var(--white);padding:24px}.bag-result b{font-size:21px}.bag-result p{font-size:13px}.bag-route{list-style:none;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}.bag-route li{border-top:3px solid var(--coral);background:var(--sand);padding:18px}.bag-route b{display:block;font-size:14px;margin-bottom:8px}.bag-route span{font-size:12px}#baggage summary{font-size:15px}@media(max-width:760px){.bag-metrics{grid-template-columns:1fr}.bag-inputs,.bag-route{grid-template-columns:repeat(2,minmax(0,1fr))}.bag-inputs input,.bag-inputs select{font-size:16px}.bag-result b{font-size:18px}}@media(max-width:430px){.bag-route{grid-template-columns:1fr}}@media print{.bag-metrics{grid-template-columns:repeat(3,1fr)}.bag-tool,.bag-route{break-inside:avoid}.bag-route{grid-template-columns:repeat(2,1fr)}}
 
+
+/* Navigation and motion layer. Existing itinerary and saved budgets are unchanged. */
+:root{--trip-header-height:128px;--ease-ocean:cubic-bezier(.22,1,.36,1)}
+html{scroll-padding-top:calc(var(--trip-header-height) + 22px)}
+.travel-header{position:sticky;top:0;z-index:80;background:#f6f3ebed;backdrop-filter:blur(18px);box-shadow:0 5px 26px #124d4b08;border-bottom:1px solid var(--line)}
+.travel-header .masthead{min-height:65px;gap:18px}
+.travel-header .brand{text-decoration:none;font-size:24px;line-height:1.1}
+.travel-header .brand span{display:block;font:8px/1.7 var(--body);letter-spacing:2.6px;margin-top:6px}
+.header-status{display:flex;align-items:center;gap:9px;margin-left:auto;color:var(--muted);font-size:11px}
+.status-orbit{width:7px;height:7px;background:var(--sea);border-radius:50%;box-shadow:0 0 0 5px #124d4b12}
+.header-tools{display:flex;gap:8px}.motion-toggle,.menu-toggle{border:1px solid #bcc9bf;background:var(--white);border-radius:30px;padding:7px 12px;font-size:11px;color:var(--sea);white-space:nowrap}.menu-toggle{display:none}
+.travel-header nav{position:static;z-index:auto;background:transparent;border:0;border-top:1px solid #124d4b12;backdrop-filter:none}
+.travel-header nav .wrap{gap:5px;align-items:center;padding-top:7px;padding-bottom:7px;scrollbar-width:thin}
+.travel-header nav a{font-size:12px;padding:8px 12px;border:0;border-radius:30px;transition:background .25s,color .25s,transform .25s;line-height:1.6}
+.travel-header nav a:hover{background:#dcebe4}.travel-header nav a[aria-current="location"]{background:var(--sea);color:var(--white);box-shadow:0 3px 10px #124d4b1c}
+.reading-track{height:3px;background:#124d4b0c}.reading-track span{height:100%;display:block;background:linear-gradient(90deg,var(--sea),#b95337,#dba66f);transform:scaleX(0);transform-origin:left;will-change:transform}
+.budget-total{top:calc(var(--trip-header-height) + 16px)}.section{scroll-margin-top:18px}
+.hero{background:radial-gradient(ellipse at 88% 10%,#c6e2d4 0,transparent 55%),radial-gradient(ellipse at 15% 95%,#efdbc1 0,transparent 48%),var(--paper)}
+.hero-art{isolation:isolate;transition:transform .5s var(--ease-ocean);transform:perspective(1000px) rotateX(var(--hero-rx,0deg)) rotateY(var(--hero-ry,0deg));box-shadow:0 24px 60px #124d4b20}
+.hero-art:after{content:'';position:absolute;width:170%;height:72%;left:-40%;bottom:-35%;border:1px solid #ffffff35;border-radius:46%;background:#badbc018;z-index:-1}
+.motion-overview{padding-top:48px}.route-poster{border-radius:8px;background:repeating-linear-gradient(0deg,transparent 0 39px,#ffffff06 40px),repeating-linear-gradient(90deg,transparent 0 39px,#ffffff06 40px),linear-gradient(130deg,#0e3939,#246a61);color:#f9f5e9;overflow:hidden;border:1px solid #356c62;box-shadow:0 20px 40px #124d4b12}
+.poster-top,.poster-bottom{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px 28px}.poster-top{padding-bottom:4px}.poster-top .tag{background:#ffffff15;color:#dfedde}.poster-bottom{border-top:1px solid #ffffff1b}.poster-bottom p{font-size:12px;line-height:1.7}.poster-bottom p span{font-size:10px;color:#b9d2c8}.poster-bottom .btn{border-color:#ffffff42;background:transparent;color:#f9f5e9;white-space:nowrap}
+.route-poster-scroll{overflow-x:auto}.journey-svg{display:block;width:100%;min-width:650px;height:auto}.route-base{fill:none;stroke:#d2e5d635;stroke-width:2}.route-stream{fill:none;stroke:#e7c290;stroke-width:3;stroke-dasharray:7 13;stroke-linecap:round}
+.route-dot{fill:#f4dfba;stroke:#fff;stroke-width:2}.route-halo{fill:#e0ead810;stroke:#e0ead845;stroke-width:1;transform-box:fill-box;transform-origin:center}
+.route-node text{text-anchor:middle;fill:#fff8e6;font:27px Georgia,serif;letter-spacing:2px}.route-node .route-sub{font:11px 'Malgun Gothic',sans-serif;letter-spacing:0;fill:#d7e7dd}
+.experience-grid{display:grid;grid-template-columns:1fr 1fr .85fr;gap:18px;margin-top:22px}.experience-card{display:block;position:relative;overflow:hidden;padding:28px;border:1px solid var(--line);border-radius:6px;color:var(--ink);text-decoration:none;transition:transform .4s var(--ease-ocean),box-shadow .4s}
+.experience-card h3{font:30px/1.3 var(--serif);letter-spacing:-1px}.experience-card p{font-size:12px;color:var(--muted);margin-top:12px}.experience-sea{background:linear-gradient(160deg,#e2eee5,#f2f3e7)}.experience-city{background:linear-gradient(155deg,#f2e5d3,#faf7ee)}.experience-mix{background:var(--white);text-align:center}.experience-link{display:block;margin-top:25px;font-size:12px;font-weight:700;color:var(--sea)}
+.sea-glyph{height:105px;position:relative;overflow:hidden;margin:10px 0 20px}.sea-glyph span{position:absolute;width:150%;height:75px;border-top:2px solid #3c7b6b60;border-radius:50%;left:-25%;top:40px}.sea-glyph span:nth-child(2){top:56px;left:-12%;opacity:.6}.sea-glyph span:nth-child(3){top:73px;left:-35%;opacity:.4}.sea-glyph i{width:26px;height:26px;border-radius:50%;background:#bc653d;position:absolute;top:12px;right:35px;box-shadow:0 0 0 10px #bc653d0a}
+.city-glyph{height:105px;display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:10px 0 20px;border-bottom:2px solid #b9533750}.city-glyph i{display:block;width:26px;height:65px;background:repeating-linear-gradient(0deg,transparent 0 10px,#f7eedd80 11px 13px),#b2835c;transform-origin:bottom;border-radius:3px 3px 0 0}.city-glyph i:nth-child(2){height:85px;background-color:#3f7466}.city-glyph i:nth-child(3){height:105px;width:35px}.city-glyph i:nth-child(4){height:72px;background-color:#557e70}.city-glyph i:nth-child(5){height:46px}
+.candidate-donut{position:relative;width:160px;height:160px;margin:19px auto 12px}.candidate-donut svg{width:100%;height:100%;transform:rotate(-90deg)}.candidate-donut circle{fill:none;stroke-width:13}.donut-base{stroke:#c59469}.donut-sea{stroke:var(--sea);stroke-dasharray:50 50;stroke-dashoffset:0}.candidate-donut>div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.candidate-donut b{font:46px Georgia,serif}.candidate-donut span{font-size:11px;color:var(--muted)}.mix-key{display:flex;justify-content:center;gap:15px;font-size:11px}.mix-key span:before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--sea);margin-right:5px}.mix-key span+span:before{background:#c59469}.mix-key b{margin-left:4px}
+.jump-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:20px;border-radius:6px;overflow:hidden}.jump-grid a{position:relative;background:var(--white);padding:19px 25px;text-decoration:none;transition:background .3s}.jump-grid a:hover{background:#e3eee4}.jump-grid span{display:block;font-size:9px;letter-spacing:1.7px;color:var(--muted)}.jump-grid b{font-size:16px}.jump-grid i{position:absolute;right:22px;top:26px;font-style:normal;font-size:22px}
+.gear-visual{display:flex;align-items:center;justify-content:center;gap:25px;padding:30px;margin:25px 0;background:linear-gradient(120deg,#e4ece1,#f4ead8);border:1px solid var(--line);border-radius:6px}.gear-picture{position:relative;width:175px;padding-top:90px;text-align:center}.gear-picture>b,.gear-picture>span{display:block}.gear-picture>b{font-size:15px}.gear-picture>span{font-size:10px;color:var(--muted)}.case-icon{position:absolute;width:43px;height:57px;border:2px solid #245e55;border-radius:8px;top:23px;background:repeating-linear-gradient(90deg,transparent 0 10px,#245e5520 11px 12px),#d5e5d5}.case-icon:before{content:'';position:absolute;left:12px;right:12px;top:-11px;height:9px;border:2px solid #245e55;border-bottom:0;border-radius:4px 4px 0 0}.case-icon:after{content:'';position:absolute;bottom:-6px;left:5px;width:5px;height:5px;border-radius:50%;background:#245e55;box-shadow:26px 0 #245e55}.case-one{left:33px;transform:rotate(-6deg)}.case-two{left:93px;top:18px;transform:rotate(6deg)}
+.fin-icon{position:absolute;inset:0 0 auto;height:90px}.fin-icon i{position:absolute;top:9px;left:55px;width:22px;height:69px;border-radius:9px 9px 3px 3px;background:linear-gradient(#265e55 30%,#679783 31%,#2d6255);transform:rotate(20deg);transform-origin:top}.fin-icon i+i{left:98px;transform:rotate(-12deg)}.gear-plus{font:28px Georgia,serif;color:#a77f53}.gear-summary{padding-left:16px;border-left:1px solid #124d4b26}.gear-summary>b{display:block;font:48px Georgia,serif;color:var(--sea);margin:10px 0}.gear-summary small{font:13px var(--body)}.gear-summary p{font-size:11px}
+#back-to-top{position:fixed;bottom:22px;right:22px;z-index:70;border:1px solid #ffffff55;border-radius:50%;width:47px;height:47px;background:var(--sea);color:white;box-shadow:0 6px 20px #124d4b35;opacity:0;visibility:hidden;translate:0 12px;transition:opacity .25s,translate .25s,visibility .25s;font-size:23px}#back-to-top.is-visible{opacity:1;visibility:visible;translate:0 0}
+html[data-motion="on"] .hero-art:after{animation:tide-turn 22s linear infinite}html[data-motion="on"] .hero-art:before{animation:sun-breath 7s ease-in-out infinite}html[data-motion="on"] .route-stream{animation:route-current 14s linear infinite}html[data-motion="on"] .route-halo{animation:harbor-pulse 3.5s ease-in-out infinite}html[data-motion="on"] .route-node:nth-of-type(even) .route-halo{animation-delay:-1.7s}html[data-motion="on"] .sea-glyph span{animation:wave-slide 6s ease-in-out infinite alternate}html[data-motion="on"] .sea-glyph span:nth-child(2){animation-delay:-2s}html[data-motion="on"] .sea-glyph span:nth-child(3){animation-delay:-4s}html[data-motion="on"] .is-revealed .city-glyph i{animation:city-rise 1.2s var(--ease-ocean) both}html[data-motion="on"] .is-revealed .city-glyph i:nth-child(even){animation-delay:.15s}html[data-motion="on"] .is-revealed .donut-sea{animation:donut-draw 1.5s var(--ease-ocean) both}html[data-motion="on"] .fin-icon{animation:fin-float 5s ease-in-out infinite}html[data-motion="on"] .is-revealed{animation:section-arrive .85s var(--ease-ocean) both;animation-delay:var(--reveal-delay,0ms)}
+@keyframes tide-turn{to{rotate:360deg}}@keyframes sun-breath{50%{translate:0 -9px;box-shadow:0 0 0 26px #efcba309}}@keyframes route-current{to{stroke-dashoffset:-200}}@keyframes harbor-pulse{50%{scale:1.35;opacity:.35}}@keyframes wave-slide{to{translate:24px -7px}}@keyframes city-rise{from{scale:1 .3;opacity:.3}to{scale:1 1;opacity:1}}@keyframes donut-draw{from{stroke-dasharray:0 100}to{stroke-dasharray:50 50}}@keyframes fin-float{50%{translate:0 -5px;rotate:3deg}}@keyframes section-arrive{from{opacity:.15;translate:0 26px}to{opacity:1;translate:0 0}}
+@media(hover:hover) and (pointer:fine){html[data-motion="on"] .experience-card[href]:hover{transform:translateY(-7px);box-shadow:0 18px 32px #124d4b13}html[data-motion="on"] .tour,html[data-motion="on"] .destination-card{transition:transform .4s var(--ease-ocean),box-shadow .4s}html[data-motion="on"] .tour:hover,html[data-motion="on"] .destination-card:hover{transform:translateY(-5px);box-shadow:0 15px 30px #124d4b12}html[data-motion="on"] .btn{transition:transform .25s,background .25s}html[data-motion="on"] .btn:hover{transform:translateY(-2px)}}
+html[data-motion="off"]{scroll-behavior:auto}html[data-motion="off"] *,html[data-motion="off"] *:before,html[data-motion="off"] *:after{animation:none!important;transition:none!important}html[data-motion="off"] .hero-art{transform:none}html[data-page-idle="true"] *,html[data-page-idle="true"] *:before,html[data-page-idle="true"] *:after{animation-play-state:paused!important}
+@media(max-width:900px){.experience-grid{grid-template-columns:1fr 1fr}.experience-mix{grid-column:1/-1;display:grid;grid-template-columns:1fr 180px 1fr;align-items:center;gap:10px}.experience-mix .candidate-donut{grid-column:2;grid-row:1/3;margin:0 auto}.experience-mix .mix-key{grid-column:3;grid-row:1}.experience-mix>p{grid-column:3;grid-row:2;margin:0}.experience-mix>.eyebrow{grid-column:1;grid-row:1/3}.gear-visual{gap:13px}.gear-summary{padding-left:12px}}
+@media(max-width:620px){.travel-header .masthead{min-height:62px;gap:8px}.travel-header .brand{font-size:18px}.travel-header .brand span{font-size:6px;letter-spacing:1.6px}.header-status{display:none}.header-tools{margin-left:auto;gap:5px}.motion-toggle,.menu-toggle{font-size:10px;padding:7px 8px}.menu-toggle{display:inline-block}.travel-header nav .wrap{gap:4px;padding-top:6px;padding-bottom:6px}.travel-header nav a{font-size:11px;padding:7px 10px}.travel-header nav.is-expanded .wrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));white-space:normal;gap:6px;max-height:215px;overflow:auto}.travel-header nav.is-expanded a{padding:8px 6px;text-align:center;background:#124d4b08}.travel-header nav.is-expanded a[aria-current="location"]{background:var(--sea)}.poster-top,.poster-bottom{padding:18px;flex-wrap:wrap;gap:10px}.poster-top .eyebrow{font-size:8px;letter-spacing:1px}.poster-top .tag{font-size:9px}.poster-bottom .btn{padding:7px 12px}.experience-grid{gap:12px}.experience-card{padding:19px}.experience-card h3{font-size:25px}.experience-card .eyebrow{font-size:8px;letter-spacing:1px}.experience-card p{font-size:11px}.experience-mix{display:block}.experience-mix .candidate-donut{margin:15px auto}.experience-mix>p{margin-top:10px}.sea-glyph,.city-glyph{height:85px}.city-glyph i{width:16px}.city-glyph i:nth-child(3){height:80px;width:23px}.city-glyph i:nth-child(2){height:66px}.city-glyph i:nth-child(4){height:54px}.jump-grid{grid-template-columns:1fr}.jump-grid a{padding:16px 22px}.jump-grid i{top:20px}.gear-visual{flex-wrap:wrap;padding:22px 12px;gap:10px}.gear-picture{width:calc(50% - 22px);max-width:175px}.gear-summary{width:100%;text-align:center;border:0;border-top:1px solid #124d4b26;padding:18px 0 0}.gear-visual>.gear-plus:nth-of-type(2){display:none}.gear-picture>span{font-size:9px}.case-one{left:calc(50% - 49px)}.case-two{left:calc(50% + 10px)}.fin-icon i{left:calc(50% - 26px)}.fin-icon i+i{left:calc(50% + 17px)}#back-to-top{right:15px;bottom:15px;width:42px;height:42px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{animation:none!important;transition:none!important}.hero-art{transform:none!important}}
+@media print{.travel-header,#back-to-top{display:none!important}.route-poster{break-inside:avoid}.route-poster-scroll{overflow:visible}.journey-svg{min-width:0}.experience-grid{grid-template-columns:1fr 1fr 1fr}.experience-mix{grid-column:auto;display:block}.gear-visual{break-inside:avoid}.experience-card{padding:15px}*,*:before,*:after{animation:none!important;transition:none!important;translate:none!important}.budget-total{position:static}html{scroll-padding-top:0}}
+
 </style>
 </head>
 <body>
 <a href="#main" class="skip">본문으로 이동</a>
-<header><div class="wrap masthead"><div class="brand">Our Australian days.</div><div class="small">HONEYMOON FIELD NOTES<br>2026.10.13 ~ 10.23</div></div></header>
+<header class="travel-header">
+ <div class="wrap masthead"><a class="brand" href="#travel-overview" aria-label="여행 한눈에 보기">Our Australian days.<span>OCEAN / CITY / TWO OF US</span></a><div class="header-status"><span class="status-orbit" aria-hidden="true"></span><span id="reading-section">여행의 시작</span></div><div class="header-tools"><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">모션 설정</button><button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="trip-nav">전체 메뉴 <span aria-hidden="true">+</span></button></div></div>
+ <nav id="trip-nav" aria-label="페이지 목차"><div class="wrap"><a href="#travel-overview">한눈에 보기</a><a href="#atlas">여행 지도</a><a href="#flights">확정 항공권</a><a href="#booking">국내선 예약</a><a href="#baggage">위탁수하물·장비</a><a href="#itinerary">날짜별 일정</a><a href="#reef">산호초 & 투어</a><a href="#transport">이동수단</a><a href="#budget">예산 계산</a><a href="#checklist">예약 체크</a><a href="#sources">출처</a></div></nav>
+ <div class="reading-track" aria-hidden="true"><span id="reading-progress"></span></div>
+</header>
 <main id="main">
 <div class="hero"><div class="wrap">
  <div class="hero-content"><div><div class="eyebrow">CAIRNS / SYDNEY · TWO PEOPLE, ONE JOURNEY</div><h1>바다에서는 깊게,<br><em>여행은 느긋하게.</em></h1><p class="intro">케언스에서 산호초와 프리다이빙을 충분히 즐긴 뒤,<br>시드니의 항구와 해변으로 이어지는 두 사람의 신혼여행.</p><div class="actions"><a class="btn primary" href="#itinerary">날짜별 일정 보기</a><a class="btn" href="#budget">우리 예산 계산하기</a><button class="btn" id="print-button" type="button">인쇄 / PDF 저장</button></div></div><div class="hero-art" aria-hidden="true"><div class="art-caption">A little deeper.<br>A little slower.</div><small>THE REEF & THE HARBOUR</small></div></div>
  <div class="metrics"><div class="metric"><span class="label">현지 숙박 · 객실 1개</span><span class="value">6 + 3 <span>박</span></span><span class="small">케언스 + 시드니</span></div><div class="metric"><span class="label">추천 국내선 탑승일</span><span class="value">10.20 <span>화요일</span></span><span class="small">CNS → SYD 직항</span></div><div class="metric"><span class="label">해양 일정</span><span class="value">3 <span>일</span></span><span class="small">프리다이빙 · 외해 리프 · 섬</span></div><div class="metric"><span class="label">추천 차량 대여</span><span class="value">1 <span>일</span></span><span class="small">팜코브 · 포트더글러스</span></div></div>
 </div></div>
-<nav aria-label="페이지 목차"><div class="wrap"><a href="#atlas">여행 지도</a><a href="#flights">확정 항공권</a><a href="#booking">국내선 예약</a><a href="#baggage">위탁수하물·장비</a><a href="#itinerary">날짜별 일정</a><a href="#reef">산호초 & 투어</a><a href="#transport">이동수단</a><a href="#budget">예산 계산</a><a href="#checklist">예약 체크</a><a href="#sources">출처</a></div></nav>
+
 <div class="wrap">
  <div class="legend" aria-label="정보 상태 범례"><span><span class="tag confirmed">항공권 확인</span>제공된 PDF 기준</span><span><span class="tag proposed">추천</span>아직 예약되지 않은 계획</span><span><span class="tag published">공개가격</span>지정일 결제 견적 아님</span><span><span class="tag estimate">예산 가정</span>비교·계산용 금액</span></div>
  <p class="fine">자료 확인 기준: 2026년 9월 8일 · 성인 2인 · 모든 일정은 해당 출발지·도착지의 현지 시각 · 실시간 가격·잔여석 자동 조회 기능은 없습니다.</p>
+
+
+<section class="section motion-overview" id="travel-overview" aria-labelledby="overview-heading">
+ <div class="section-head"><div><span class="section-no">THE JOURNEY / At a glance</span><h2 id="overview-heading">한 장으로 펼쳐 보는<br>우리의 호주.</h2></div><p>산호초에서 시작해 도시의 항구로 이어지는 여행. 아래 도식과 바로가기로 전체 흐름부터 살펴보세요. 국내선 날짜·교육 과정은 예약 전 선택 사항입니다.</p></div>
+ <div class="route-poster">
+ <div class="poster-top"><span class="eyebrow">SEOUL / OSAKA / CAIRNS / SYDNEY</span><span class="tag confirmed">2026.10.13 ~ 10.23</span></div>
+ <div class="route-poster-scroll"><svg class="journey-svg" viewBox="0 0 1000 230" role="img" aria-labelledby="route-svg-title route-svg-desc">
+ <title id="route-svg-title">인천에서 간사이와 케언스를 거쳐 시드니에서 귀국하는 항공 루트</title><desc id="route-svg-desc">인천 출국 10월 13일, 간사이 환승, 케언스 도착 10월 14일, 날짜 미확정 국내선으로 시드니 이동, 10월 23일 인천 귀국. 실제 지리나 비행 경로가 아닌 순서 도식입니다.</desc>
+ <path class="route-base" d="M80 120 C155 10 245 10 300 100 S460 210 510 120 S660 10 720 100 S875 210 925 120"/>
+ <path class="route-stream" d="M80 120 C155 10 245 10 300 100 S460 210 510 120 S660 10 720 100 S875 210 925 120"/>
+ <g class="route-node"><circle class="route-halo" cx="80" cy="120" r="18"/><circle class="route-dot" cx="80" cy="120" r="7"/><text x="80" y="169">ICN</text><text class="route-sub" x="80" y="191">10/13 인천 출국</text></g>
+ <g class="route-node"><circle class="route-halo" cx="300" cy="100" r="18"/><circle class="route-dot" cx="300" cy="100" r="7"/><text x="300" y="149">KIX</text><text class="route-sub" x="300" y="171">간사이 환승 · 짐 재수속</text></g>
+ <g class="route-node"><circle class="route-halo" cx="510" cy="120" r="23"/><circle class="route-dot" cx="510" cy="120" r="10"/><text x="510" y="62">CNS</text><text class="route-sub" x="510" y="84">10/14 케언스 도착</text></g>
+ <g class="route-node"><circle class="route-halo" cx="720" cy="100" r="18"/><circle class="route-dot" cx="720" cy="100" r="7"/><text x="720" y="157">SYD</text><text class="route-sub" x="720" y="179">국내선 추가 예약</text></g>
+ <g class="route-node"><circle class="route-halo" cx="925" cy="120" r="18"/><circle class="route-dot" cx="925" cy="120" r="7"/><text x="925" y="169">ICN</text><text class="route-sub" x="925" y="191">10/23 인천 귀국</text></g>
+ </svg></div>
+ <div class="poster-bottom"><p>국제선은 기존 항공권 기준 · 국내선은 미예약<br><span>선은 이동 순서 도식이며 실제 비행 항로가 아닙니다.</span></p><a class="btn" href="#atlas">실제 지도에서 보기 <span aria-hidden="true">→</span></a></div>
+ </div>
+ <div class="experience-grid">
+ <a class="experience-card experience-sea" href="#reef"><span class="eyebrow">01 / BENEATH THE BLUE</span><div class="sea-glyph" aria-hidden="true"><span></span><span></span><span></span><i></i></div><h3>바다를 가까이.</h3><p>두 사람 모두 AIDA 2.<br>전용 프리다이빙과 리프 투어의 참가 조건을 살펴보세요.</p><span class="experience-link">바다 활동 살펴보기 →</span></a>
+ <a class="experience-card experience-city" href="#destinations"><span class="eyebrow">02 / A DIFFERENT RHYTHM</span><div class="city-glyph" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><h3>도시를 천천히.</h3><p>항구를 건너고, 골목을 걷고.<br>사진과 함께 두 사람의 여행지 후보를 골라보세요.</p><span class="experience-link">추천 여행지 20곳 →</span></a>
+ <div class="experience-card experience-mix"><span class="eyebrow">03 / YOUR DESTINATION EDIT</span><div class="candidate-donut" role="img" aria-label="여행지 후보 20곳 중 바다·해안 10곳, 도시·문화 10곳"><svg viewBox="0 0 140 140" aria-hidden="true"><circle class="donut-base" cx="70" cy="70" r="55"/><circle class="donut-sea" cx="70" cy="70" r="55" pathLength="100"/></svg><div><b>20</b><span>여행지 후보</span></div></div><div class="mix-key"><span>바다·해안 <b>10</b></span><span>도시·문화 <b>10</b></span></div><p class="small">후보의 분류 비율입니다.<br>실제 숙박·활동 시간의 비율은 아닙니다.</p></div>
+ </div>
+ <div class="jump-grid"><a href="#itinerary"><span>DAY BY DAY</span><b>날짜별 일정</b><i aria-hidden="true">↗</i></a><a href="#baggage"><span>GEAR ON BOARD</span><b>위탁수하물·장비</b><i aria-hidden="true">↗</i></a><a href="#budget"><span>MAKE IT YOURS</span><b>우리 예산 계산</b><i aria-hidden="true">↗</i></a></div>
+</section>
 
  <section class="section" id="destinations"><span class="section-no">The destination edit / 20 places for two</span><div class="discovery-intro"><div><div class="eyebrow">AIDA 2 / AN ACTIVE HONEYMOON</div><h2>처음 만나는 호주,<br>어디부터 좋아하게 될까.</h2><p>프리다이빙으로 만나는 산호초, 커피 향이 흐르는 동네, 해 질 무렵의 항구. 두 분의 취향과 확정 항공 루트에 맞춰 <strong>케언스·시드니에서 실제로 갈 만한 20곳</strong>을 골랐습니다.</p><p>이 순위는 호주 전체의 공식 인기 순위가 아니라 <strong>액티비티 선호, 신혼여행 분위기, 이동 부담, 경험의 중복</strong>을 고려한 맞춤 추천입니다. 멜버른·울루루 등 다른 도시까지 추가하는 일정은 포함하지 않았습니다.</p></div><div class="balance-visual"><div class="eyebrow">ACTIVITY FIRST / REST BETWEEN</div><div class="halves"><div><b>2<span>일</span></b><span>전용 프리다이빙 우선</span></div><div><b>1<span>개</span></b><span>하루의 핵심 활동</span></div></div><div class="balance-strip" aria-hidden="true"><span></span><span></span></div><p>시간을 반반 나누지 않고 액티비티부터 선택<br>출항·컨디션에 맞춰 휴식과 날씨 예비일 확보</p><p>20개 후보 분류: 바다·해안 10곳 / 도시·문화 10곳. 해안 분류 모두가 수중 액티비티 장소인 것은 아닙니다.</p></div></div>
  <div class="balanced-banner"><strong>새 기본안: 케언스 5박 + 시드니 4박 / 국내선 10월 19일(월) 추천.</strong><br>두 분 모두 AIDA 2 보유라는 사용자 제공 정보를 반영했습니다. 국제선과 숙박 배분은 유지하되 활동 구성을 바꿉니다. 국내선 미예약 전제이며, 프리다이빙 2회 운영일을 먼저 확인하세요.</div>
@@ -143,6 +215,15 @@ header{border-bottom:1px solid var(--line)}.masthead{display:flex;align-items:ce
 
 <section class="section" id="baggage" aria-labelledby="baggage-title">
  <div class="section-head"><div><span class="section-no">GEAR / Checked baggage</span><h2 id="baggage-title">롱핀부터 환승까지,<br>두 사람의 장비 이동 가이드</h2></div><p>2026.09.10 반영: 기존 일반 위탁수하물은 그대로 두고, 프리다이빙 장비 가방을 별도 추가 위탁합니다. 추가 개수·중량 구매비와 특수·대형 취급료를 나누어 보며, 항공사별 접수 분류는 확인이 필요합니다.</p></div>
+
+<div class="gear-visual" role="group" aria-label="기존 일반 캐리어 두 개에 별도 장비 가방을 추가하는 포장 구성">
+ <div class="gear-picture"><div class="case-icon case-one" aria-hidden="true"></div><div class="case-icon case-two" aria-hidden="true"></div><b>기존 일반 짐</b><span>1인 1개 · 총 2개 가정</span></div>
+ <span class="gear-plus" aria-hidden="true">+</span>
+ <div class="gear-picture"><div class="fin-icon" aria-hidden="true"><i></i><i></i></div><b>별도 장비 가방</b><span>공용 1개 또는 각자 1개</span></div>
+ <span class="gear-plus" aria-hidden="true">=</span>
+ <div class="gear-summary"><span class="eyebrow">TOTAL CHECKED PIECES</span><b>3 <small>또는</small> 4 <small>개</small></b><p>추가 개수·중량 구매비<br><strong>+ 조건에 해당하는 장비 취급료</strong></p></div>
+</div>
+
  <div class="bag-metrics"><div><span class="eyebrow">PEACH / ICN → KIX</span><b>20 <small>kg · 1개 / 1인</small></b><p>기존 캐리어 외 장비 가방 추가 개수 요금 확인</p></div><div><span class="eyebrow">JETSTAR / KIX → CNS</span><b>20 <small>kg / 1인</small></b><p>한 변 100cm 초과 시 별도 취급료</p></div><div><span class="eyebrow">T’WAY / SYD → ICN</span><b>23 <small>kg / 1인</small></b><p>기존 짐 + 별도 장비의 합산 중량·분류 문의</p></div></div>
  <p class="fine">위 중량은 기존 전자항공권에서 확인한 내용입니다. 실제 예약 변경·추가 구매 내역은 반영하지 않았습니다. 국내선은 미예약이며, 국제선 수하물 구매가 국내선에 자동 적용되지 않습니다.</p>
  <div class="table-wrap" style="margin-top:26px"><table class="bag-table"><caption class="small" style="text-align:left;padding:10px 0">가방 외부 치수 기준: 손잡이·바퀴·보호 포장을 모두 포함합니다.</caption><thead><tr><th scope="col">구간</th><th scope="col">롱핀 / 규격</th><th scope="col">추가 비용과 대처</th></tr></thead><tbody>
@@ -567,6 +648,56 @@ activityTripUpdate();
  }
  root.querySelectorAll('.bag-inputs input,.bag-inputs select').forEach(input=>input.addEventListener('input',update));
  update();
+})();
+</script>
+
+<button id="back-to-top" type="button" aria-label="페이지 맨 위로">↑</button>
+
+<script>
+(function initTravelMotion(){
+ const root=document.documentElement,header=document.querySelector('.travel-header'),nav=document.getElementById('trip-nav');
+ const toggle=document.getElementById('motion-toggle'),menu=document.getElementById('menu-toggle'),topButton=document.getElementById('back-to-top');
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+ let preference=null;try{preference=localStorage.getItem('australia-motion-preference');}catch(e){}
+ let enabled=false;
+ function setMotion(){
+  enabled=!reduced.matches&&preference!=='off';root.dataset.motion=enabled?'on':'off';
+  toggle.textContent=reduced.matches?'모션 줄임 · 기기 설정':enabled?'모션 켜짐':'모션 꺼짐';
+  toggle.setAttribute('aria-pressed',String(enabled));toggle.setAttribute('aria-label',enabled?'애니메이션 끄기':'애니메이션 켜기');
+  if(reduced.matches)toggle.setAttribute('aria-label','기기의 모션 줄이기 설정 적용 중');
+ }
+ toggle.addEventListener('click',()=>{if(reduced.matches)return;preference=enabled?'off':'on';try{localStorage.setItem('australia-motion-preference',preference);}catch(e){}setMotion();});
+ if(reduced.addEventListener)reduced.addEventListener('change',setMotion);
+ setMotion();
+ let headerHeight=header.getBoundingClientRect().height;
+ function updateHeaderSize(){headerHeight=header.getBoundingClientRect().height;root.style.setProperty('--trip-header-height',headerHeight+'px');}
+ if('ResizeObserver' in window)new ResizeObserver(updateHeaderSize).observe(header);
+ window.addEventListener('resize',updateHeaderSize,{passive:true});updateHeaderSize();
+ function closeMenu(){nav.classList.remove('is-expanded');menu.setAttribute('aria-expanded','false');menu.innerHTML='전체 메뉴 <span aria-hidden="true">+</span>';updateHeaderSize();}
+ menu.addEventListener('click',()=>{const expanded=menu.getAttribute('aria-expanded')!=='true';nav.classList.toggle('is-expanded',expanded);menu.setAttribute('aria-expanded',String(expanded));menu.innerHTML=expanded?'메뉴 접기 <span aria-hidden="true">−</span>':'전체 메뉴 <span aria-hidden="true">+</span>';updateHeaderSize();});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menu.getAttribute('aria-expanded')==='true'){closeMenu();menu.focus();}});
+ function goTo(target){closeMenu();const y=target.getBoundingClientRect().top+window.scrollY-headerHeight-18;window.scrollTo({top:Math.max(0,y),behavior:enabled?'smooth':'auto'});target.setAttribute('tabindex','-1');target.focus({preventScroll:true});}
+ nav.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{const target=document.getElementById(link.hash.slice(1));if(!target)return;event.preventDefault();goTo(target);try{history.pushState(null,'',link.hash);}catch(e){}}));
+ document.querySelectorAll('.jump-grid a,.experience-card[href],.poster-bottom a,.travel-header .brand').forEach(link=>link.addEventListener('click',event=>{const target=document.getElementById(link.hash.slice(1));if(!target)return;event.preventDefault();goTo(target);try{history.pushState(null,'',link.hash);}catch(e){}}));
+ const links=Array.from(nav.querySelectorAll('a[href^="#"]'));
+ const chapters=links.map(link=>({link,target:document.getElementById(link.hash.slice(1))})).filter(item=>item.target).sort((a,b)=>a.target.compareDocumentPosition(b.target)&Node.DOCUMENT_POSITION_FOLLOWING?-1:1);
+ const progress=document.getElementById('reading-progress'),reading=document.getElementById('reading-section');
+ let queued=false,lastId='';
+ function updateReading(){
+  queued=false;const extent=document.documentElement.scrollHeight-window.innerHeight;progress.style.transform='scaleX('+Math.min(1,Math.max(0,extent>0?window.scrollY/extent:0))+')';
+  topButton.classList.toggle('is-visible',window.scrollY>600);
+  let active=null;for(const chapter of chapters){if(chapter.target.getBoundingClientRect().top<=headerHeight+90)active=chapter;}
+  const id=active?active.target.id:'';
+  if(id!==lastId){lastId=id;links.forEach(link=>link.removeAttribute('aria-current'));if(active){active.link.setAttribute('aria-current','location');reading.textContent=active.link.textContent;}else reading.textContent='여행의 시작';}
+ }
+ function scheduleReading(){if(!queued){queued=true;requestAnimationFrame(updateReading);}}
+ window.addEventListener('scroll',scheduleReading,{passive:true});window.addEventListener('resize',scheduleReading,{passive:true});updateReading();
+ topButton.addEventListener('click',()=>{closeMenu();window.scrollTo({top:0,behavior:enabled?'smooth':'auto'});document.querySelector('.travel-header .brand').focus({preventScroll:true});});
+ const revealTargets=document.querySelectorAll('.section-head,.experience-card,.route-poster,.tour,.destination-card,.day,.bag-metrics>div,.gear-visual,.bag-route li,.jump-grid a');
+ if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(!entry.isIntersecting)continue;entry.target.classList.add('is-revealed');observer.unobserve(entry.target);}},{threshold:.08});revealTargets.forEach((target,index)=>{target.style.setProperty('--reveal-delay',((index%3)*70)+'ms');observer.observe(target);});}
+ const art=document.querySelector('.hero-art');
+ if(art&&window.matchMedia('(hover:hover) and (pointer:fine)').matches){art.addEventListener('pointermove',event=>{if(!enabled)return;const rect=art.getBoundingClientRect();art.style.setProperty('--hero-rx',((.5-(event.clientY-rect.top)/rect.height)*5)+'deg');art.style.setProperty('--hero-ry',(((event.clientX-rect.left)/rect.width-.5)*7)+'deg');});art.addEventListener('pointerleave',()=>{art.style.setProperty('--hero-rx','0deg');art.style.setProperty('--hero-ry','0deg');});}
+ document.addEventListener('visibilitychange',()=>{root.dataset.pageIdle=String(document.hidden);});
 })();
 </script>
 
