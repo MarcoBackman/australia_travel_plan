@@ -136,6 +136,70 @@ html,body{height:100%;background:var(--paper)}.trip-studio{width:100vw!important
 }
 @media(max-width:700px) and (max-height:520px){.studio-header .eyebrow,.studio-guidance,.photo-route-guide{display:none}.studio-header{padding:3px 10px}.studio-header h2{font-size:17px}.studio-footer{padding:4px 10px}.studio-date-strip{display:none}}
 
+
+/* Compact phone workspace; desktop spreadsheet is unchanged. */
+.studio-compact-nav,.compact-card-meta,#studio-mobile-more{display:none}
+.grid-buttons [data-action="details"]{display:none}
+.studio-mobile-options{width:min(580px,calc(100% - 24px));max-height:90vh;max-height:90dvh;border:1px solid var(--line);padding:0;border-radius:18px;background:var(--paper);color:var(--ink);overscroll-behavior:contain}
+.studio-mobile-options::backdrop{background:#173c3580;backdrop-filter:blur(5px)}
+.compact-options-head{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--paper);padding:12px 16px;z-index:20;border-bottom:1px solid var(--line)}
+.compact-options-head h3{font-size:18px}.compact-options-head button{min-width:56px;min-height:44px;border:1px solid var(--line);background:var(--white);border-radius:8px;color:var(--sea)}
+.compact-options-body{padding:12px 16px 24px}.compact-options-body>*{margin:0 0 16px!important}
+.compact-options-body .studio-subtools{overflow:visible;display:block;padding:0;min-height:0}
+.compact-options-body .studio-subtools>p{display:block;font-size:12px;margin-bottom:12px}
+.compact-options-body .studio-subtools>div{display:grid;min-width:0;grid-template-columns:1fr;gap:8px}
+.compact-options-body select{width:100%;max-width:none;font-size:16px;min-height:46px}
+.compact-options-body .studio-history{display:flex}.compact-options-body .studio-history button{flex:1}
+.compact-options-body .studio-lock{display:flex;min-height:44px}.compact-options-body input[type=checkbox]{width:22px;height:22px;accent-color:var(--sea)}
+.compact-options-body .studio-file-menu>summary{min-height:44px;display:flex;align-items:center}
+.compact-options-body .studio-file-menu>div{position:static!important;max-height:none;box-shadow:none;min-width:0;margin-top:8px}
+.compact-options-body .studio-file-menu button{min-height:48px;font-size:14px}
+.compact-options-body .photo-route-guide,.compact-options-body .studio-guidance{display:block!important;max-height:none!important;overflow:visible;padding:12px;border:1px solid var(--line);border-radius:8px}
+.compact-options-body .btn{min-height:44px;font-size:13px}.compact-options-body #studio-touch-control{display:flex;align-items:center;gap:8px;min-height:44px}
+.compact-wide-control{display:flex;align-items:center;gap:8px;min-height:44px;font-size:13px}
+.phone-gantt{padding:12px;background:var(--paper)}.phone-gantt-day{margin-bottom:22px}.phone-gantt-day h3{font-size:14px;padding:10px 0}
+.phone-gantt-track{position:relative;margin-left:44px;border-left:1px solid var(--line);background:repeating-linear-gradient(180deg,transparent 0 47px,#124d4b13 47px 48px)}
+.phone-gantt-hour{position:absolute;left:-44px;width:38px;transform:translateY(-6px);font-size:10px;color:var(--muted)}
+.phone-gantt-event{position:absolute;left:calc(var(--phone-lane) * (100% / var(--phone-lanes)) + 5px);width:calc(100% / var(--phone-lanes) - 10px);top:var(--phone-top);height:var(--phone-height);min-height:22px;overflow:hidden;padding:5px 9px;border:0;border-left:3px solid var(--sea);border-radius:6px;background:#dce9df;color:var(--ink);text-align:left;touch-action:pan-y;font:12px/1.5 var(--body)}
+.phone-gantt-event b{display:block;font-size:11px;color:var(--sea)}.phone-gantt-event.is-flight{background:#f0e0d0;border-color:var(--coral)}.phone-gantt-empty{padding:20px;font-size:13px;color:var(--muted)}
+.phone-gantt-note{font-size:12px;color:var(--muted);margin-bottom:12px}
+@media(max-width:700px){
+ .trip-studio{height:var(--studio-phone-height,100dvh)!important;max-height:100dvh!important}
+ .studio-header{padding:7px 12px;padding-top:max(7px,env(safe-area-inset-top));min-height:54px}
+ .studio-header .eyebrow{display:none}.studio-header h2{font-size:18px}.studio-header-right{gap:0}
+ .studio-tools{display:flex;overflow:visible;flex-wrap:nowrap;padding:5px 10px;gap:6px;min-height:56px}
+ .studio-view-switch{flex:1;min-width:0;display:flex}.studio-view-switch button{flex:1;padding:7px 9px;font-size:12px;white-space:nowrap}
+ #studio-add{min-height:44px;padding:7px 10px!important;font-size:12px}
+ #studio-mobile-more{display:block;min-height:44px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--white);color:var(--sea);font-size:12px}
+ .studio-date-strip,.studio-mobile-navigator{display:none!important}
+ .studio-compact-nav{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;padding:6px 10px;background:var(--aqua);flex-shrink:0}
+ .studio-compact-nav button{min-height:44px;border:1px solid var(--line);border-radius:8px;background:var(--white);color:var(--sea);font-size:22px}
+ .studio-compact-nav select{width:100%;min-width:0;min-height:44px;font-size:16px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:var(--white);color:var(--sea)}
+ .studio-grid-view{padding:0 10px 18px;background:#ecefe5}.studio-grid-table{display:block;min-width:0!important;width:100%;border:0}.studio-grid-table colgroup,.studio-grid-table thead{display:none}.studio-grid-table tbody{display:block}
+ .studio-grid-table tbody tr[data-id]{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin:10px 0 16px;border:1px solid #bacbbb;border-radius:12px;overflow:hidden;background:var(--white)}
+ .studio-grid-table tbody tr[data-id] td{display:block;min-width:0;padding:7px 10px;border:0;border-bottom:1px solid var(--line);background:transparent}
+ .studio-grid-table tbody tr[data-id] td[data-label]:before{content:attr(data-label);display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+ .studio-grid-table tbody tr[data-id] .grid-index{display:block!important;position:static;grid-column:1/-1;order:-4;text-align:left;background:#f0f3e9;padding:7px 10px}
+ .grid-index .grid-row-handle{display:none}.compact-card-meta{display:block;font-size:10px;color:var(--muted)}
+ .studio-grid-table td[data-mobile-field="title"]{grid-column:1/-1;order:-3;background:var(--aqua)!important}
+ .studio-grid-table td[data-mobile-field="start"],.studio-grid-table td[data-mobile-field="end"]{order:-2}
+ .studio-grid-table td[data-mobile-field="place"]{grid-column:1/-1;order:-1}
+ .studio-grid-table tbody tr[data-id]:not(.compact-expanded) td[data-mobile-field]:not([data-mobile-field="title"]):not([data-mobile-field="start"]):not([data-mobile-field="end"]):not([data-mobile-field="place"]){display:none}
+ .studio-grid-table td[data-mobile-field="notes"]{grid-column:1/-1}.studio-grid-table .studio-cell{font-size:16px;min-height:44px;width:100%;max-width:100%;padding:7px 0}
+ .studio-grid-table textarea.studio-cell{min-height:80px;height:80px}
+ .studio-grid-table tbody tr[data-id] .grid-buttons{display:flex!important;grid-column:1/-1;gap:7px;justify-content:flex-end}
+ .grid-buttons [data-action="details"]{display:block;margin-right:auto}.grid-buttons button{min-height:44px;padding:6px 10px;font-size:12px}
+ .studio-grid-table .studio-day-group{display:block;position:sticky;top:0;z-index:5}.studio-grid-table .studio-day-group td{display:block;padding:10px}
+ .studio-day-group span{display:none}.studio-grid-empty,.studio-grid-empty td{display:block}
+ .studio-shell>.studio-content,.studio-content{min-height:80px!important;flex:1}
+ .studio-footer{padding:5px 10px;padding-bottom:max(5px,env(safe-area-inset-bottom));font-size:10px;min-height:28px}
+ .studio-footer #studio-count{display:none}.studio-selection[hidden],#studio-touch-control[hidden]{display:none!important}
+ .studio-selection{padding:6px 10px}.studio-warning{max-height:40px;font-size:10px}
+ html.phone-keyboard .studio-compact-nav,html.phone-keyboard .studio-footer,html.phone-keyboard .studio-warning{display:none}
+ .studio-mobile-options{width:100%;max-width:100%;max-height:var(--studio-phone-height,100dvh);height:auto;margin:auto 0 0;border-radius:18px 18px 0 0}
+ .compact-options-body{padding-bottom:max(22px,env(safe-area-inset-bottom))}
+}
+
 </style></head><body>
 <span id="studio-launch-count" hidden></span><button type="button" id="recommended-auto-open" data-open-studio="grid" hidden>추천 일정 열기</button>
 <dialog id="trip-studio" class="trip-studio" aria-labelledby="studio-title">
@@ -214,7 +278,72 @@ html,body{height:100%;background:var(--paper)}.trip-studio{width:100vw!important
  $('studio-mobile-next').addEventListener('click',()=>stepMobile(1));
  $('studio-touch-drag').addEventListener('change',()=>{modal.classList.toggle('studio-touch-drag',$('studio-touch-drag').checked);if(!$('studio-touch-drag').checked)cleanupDrag();});
 
+
+ const compactScreen=window.matchMedia('(max-width:700px)'),compactExpanded=new Set();
+ const compactMore=el('button','','설정');compactMore.id='studio-mobile-more';compactMore.type='button';compactMore.setAttribute('aria-haspopup','dialog');modal.querySelector('.studio-tools').append(compactMore);
+ const compactOptions=el('dialog','studio-mobile-options');compactOptions.setAttribute('aria-label','일정 설정과 파일');
+ const compactHead=el('div','compact-options-head'),compactClose=el('button','','닫기');compactClose.type='button';compactHead.append(el('h3','','일정 설정'),compactClose);
+ const compactBody=el('div','compact-options-body');compactOptions.append(compactHead,compactBody);document.body.append(compactOptions);
+ const compactWideLabel=el('label','compact-wide-control'),compactWide=el('input');compactWide.type='checkbox';compactWideLabel.append(compactWide,document.createTextNode('모바일에서도 가로 간트 사용'));compactBody.append(compactWideLabel);
+ const compactNav=el('div','studio-compact-nav'),compactPrev=el('button','','‹'),compactNext=el('button','','›'),compactPicker=el('select');
+ compactNav.setAttribute('aria-label','일정 날짜 선택');compactPrev.type=compactNext.type='button';compactPrev.setAttribute('aria-label','이전 날짜');compactNext.setAttribute('aria-label','다음 날짜');compactPicker.setAttribute('aria-label','보고 편집할 날짜');
+ for(const [value,label]of [['all','전체 일정'],...DATES.map((d,i)=>[d,d.slice(5)+' '+WEEK[i]+'요일'])]){const option=el('option','',label);option.value=value;compactPicker.append(option);}
+ compactNav.append(compactPrev,compactPicker,compactNext);modal.querySelector('.studio-tools').after(compactNav);
+ const compactMoved=[];
+ for(const selector of ['.studio-history','.studio-lock','.studio-file-menu','.studio-subtools','.studio-guidance','.photo-route-guide','#studio-touch-control']){
+  const node=modal.querySelector(selector);if(!node)continue;const anchor=document.createComment('compact tools origin');node.before(anchor);compactMoved.push({node,anchor});
+ }
+ function compactLayout(){
+  if(compactScreen.matches){for(const {node}of compactMoved)compactBody.append(node);}
+  else{if(compactOptions.open)compactOptions.close();for(const {node,anchor}of compactMoved)anchor.after(node);}
+ }
+ compactLayout();
+ compactMore.addEventListener('click',()=>compactOptions.showModal());compactClose.addEventListener('click',()=>compactOptions.close());
+ compactOptions.addEventListener('close',()=>{if(modal.open)compactMore.focus({preventScroll:true});});
+ compactOptions.addEventListener('click',event=>{if(event.target===compactOptions){const rect=compactOptions.getBoundingClientRect();if(event.clientY<rect.top||event.clientY>rect.bottom)compactOptions.close();}});
+ compactBody.addEventListener('click',event=>{if(event.target.closest('[data-photo-date]'))compactOptions.close();});
+ function compactPick(date){filter=date;if(date!=='all')$('studio-add-date').value=date;render();$('studio-content').scrollTop=0;}
+ compactPicker.addEventListener('change',()=>compactPick(compactPicker.value));
+ compactPrev.addEventListener('click',()=>compactPick(DATES[Math.max(0,DATES.indexOf(filter)-1)]));
+ compactNext.addEventListener('click',()=>compactPick(DATES[Math.min(DATES.length-1,DATES.indexOf(filter)+1)]));
+ compactWide.addEventListener('change',()=>{if(view==='gantt')chart();});
+ compactScreen.addEventListener('change',()=>{compactLayout();render();});
+ function compactSummary(){compactPicker.value=filter;compactPrev.disabled=filter===DATES[0];compactNext.disabled=filter===DATES[DATES.length-1];}
+ function phoneChart(){
+  const host=$('studio-gantt-view');host.replaceChildren();const canvas=el('div','phone-gantt');canvas.append(el('p','phone-gantt-note','세로로 스크롤 · 일정을 누르면 카드 상세 편집 · 시간은 선택한 차트 도시 기준'));
+  const zone=$('studio-chart-zone').value,all=events();
+  for(const date of datesShown()){
+   const start=utc(date,'00:00',zone),end=start+DAY,section=el('section','phone-gantt-day');
+   section.append(el('h3','',date.slice(5)+' '+WEEK[DATES.indexOf(date)]+' · '+ZONES[zone].label));
+   const items=all.filter(e=>Number.isFinite(e.start)&&Number.isFinite(e.end)&&e.end>e.start&&e.start<end&&e.end>start).sort((a,b)=>a.start-b.start);
+   if(!items.length){section.append(el('p','phone-gantt-empty','시간이 있는 일정이 없습니다. 카드에서 일정을 추가하세요.'));canvas.append(section);continue;}
+   const first=Math.max(0,Math.floor((Math.max(start,items[0].start)-start)/3600000)-1);
+   const last=Math.min(24,Math.ceil((Math.min(end,Math.max(...items.map(e=>e.end)))-start)/3600000)+1);
+   const track=el('div','phone-gantt-track');track.style.height=((last-first)*48+18)+'px';
+   for(let hour=first;hour<=last;hour++){const tick=el('span','phone-gantt-hour',String(hour).padStart(2,'0')+':00');tick.style.top=((hour-first)*48)+'px';track.append(tick);}
+   const lanes=[],positioned=items.map(event=>{const visibleStart=Math.max(start,event.start),visibleEnd=Math.min(end,event.end);let lane=lanes.findIndex(until=>until<=visibleStart);if(lane<0)lane=lanes.length;lanes[lane]=visibleEnd;return {event,lane,visibleStart,visibleEnd};});
+   for(const {event,lane,visibleStart,visibleEnd}of positioned){
+    const from=local(event.start,zone),to=local(event.end,zone),button=el('button','phone-gantt-event'+(event.item.transport==='항공'?' is-flight':''));
+    button.type='button';button.style.setProperty('--phone-lane',lane);button.style.setProperty('--phone-lanes',lanes.length);
+    button.style.setProperty('--phone-top',((visibleStart-start)/3600000-first)*48+'px');button.style.setProperty('--phone-height',Math.max(22,(visibleEnd-visibleStart)/3600000*48-3)+'px');
+    button.append(el('b','',from.time+' → '+to.time),document.createTextNode(event.item.title||'제목 없는 일정'));
+    button.setAttribute('aria-label',(event.item.title||'일정')+' '+from.date+' '+from.time+'부터 '+to.date+' '+to.time+'까지, 상세 편집');
+    button.addEventListener('click',()=>{selectedId=event.item.id;filter=event.date;view='grid';compactExpanded.add(selectedId);render();const row=$('studio-grid-view').querySelector('tr[data-id="'+selectedId+'"]');if(row)row.scrollIntoView({block:'start'});});
+    track.append(button);
+   }
+   section.append(track);canvas.append(section);
+  }
+  host.append(canvas);
+ }
+ function compactViewport(){
+  const viewport=window.visualViewport;if(!viewport)return;
+  document.documentElement.style.setProperty('--studio-phone-height',Math.round(viewport.height)+'px');
+  document.documentElement.classList.toggle('phone-keyboard',compactScreen.matches&&viewport.height<window.innerHeight*.78);
+ }
+ if(window.visualViewport)window.visualViewport.addEventListener('resize',compactViewport);compactViewport();
+
  function summary(){
+  compactSummary();
   mobileSummary();
   const all=events(),completed=all.filter(e=>e.item.state==='done').length;
   $('studio-count').textContent=all.length+'개 일정 · '+completed+'개 다녀옴';
@@ -250,18 +379,19 @@ html,body{height:100%;background:var(--paper)}.trip-studio{width:100vw!important
    const rows=data.days[date].rows;
    if(!rows.length){const empty=el('tr','studio-grid-empty');empty.dataset.date=date;const td=el('td','','비워 둔 하루입니다. 위의 + 일정 버튼으로 추가하거나 다른 날짜에서 행을 옮기세요.');td.colSpan=13;empty.append(td);tbody.append(empty);}
    for(const [index,item]of rows.entries()){
-    const line=el('tr',item.id===selectedId?'is-selected':'');line.dataset.id=item.id;line.dataset.date=date;
-    const handleCell=el('td','grid-index'),handle=el('button','grid-row-handle',locked(item)?'·':'⋮⋮');handle.type='button';handle.draggable=!locked(item);handle.disabled=locked(item);handle.setAttribute('aria-label',locked(item)?'예약 완료 보호 중':'일정 '+(index+1)+'을 다른 날짜로 드래그');handle.append(el('small','',String(index+1)));handleCell.append(handle);line.append(handleCell);
+    const line=el('tr',(item.id===selectedId?'is-selected':'')+(compactExpanded.has(item.id)?' compact-expanded':''));line.dataset.id=item.id;line.dataset.date=date;
+    const handleCell=el('td','grid-index'),handle=el('button','grid-row-handle',locked(item)?'·':'⋮⋮');handle.type='button';handle.draggable=!locked(item);handle.disabled=locked(item);handle.setAttribute('aria-label',locked(item)?'예약 완료 보호 중':'일정 '+(index+1)+'을 다른 날짜로 드래그');handle.append(el('small','',String(index+1)));handleCell.append(handle,el('span','compact-card-meta',ZONES[item.startZone].label+' → '+ZONES[item.endZone].label+(item.endDay?' · 종료 +'+item.endDay+'일':'')+' · '+STATES[item.state]));line.append(handleCell);
     for(const column of columns){const td=el('td');td.dataset.label=column.label;td.dataset.mobileField=column.field;let input;if(column.choices){input=el('select','studio-cell');for(const [value,label]of column.choices){const option=el('option','',label);option.value=String(value);input.append(option);}input.value=String(column.field==='date'?date:item[column.field]);}
      else{input=el(column.multiline?'textarea':'input','studio-cell');if(!column.multiline)input.type=column.type||'text';input.value=item[column.field];if(column.max)input.maxLength=column.max;if(column.field==='title')input.placeholder='새 일정';if(column.multiline)input.rows=1;}
      input.dataset.field=column.field;input.disabled=locked(item);input.setAttribute('aria-label',date.slice(5)+' 일정 '+(index+1)+' '+column.label);td.append(input);line.append(td);
     }
-    const buttons=el('td','grid-buttons');for(const [action,label]of [['copy','복제'],['delete','삭제']]){const button=el('button','',label);button.type='button';button.dataset.action=action;button.disabled=action==='delete'&&locked(item);buttons.append(button);}line.append(buttons);tbody.append(line);
+    const buttons=el('td','grid-buttons');for(const [action,label]of [['details',compactExpanded.has(item.id)?'상세 접기':'상세 편집'],['copy','복제'],['delete','삭제']]){const button=el('button','',label);button.type='button';button.dataset.action=action;if(action==='details')button.setAttribute('aria-expanded',String(compactExpanded.has(item.id)));button.disabled=action==='delete'&&locked(item);buttons.append(button);}line.append(buttons);tbody.append(line);
    }
   }table.append(tbody);host.append(table);
  }
  function local(instant,zone){const d=new Date(instant+ZONES[zone].offset*3600000);return {date:d.toISOString().slice(0,10),time:d.toISOString().slice(11,16)};}
  function chart(){
+  if(compactScreen.matches&&!compactWide.checked){phoneChart();return;}
   const host=$('studio-gantt-view');host.replaceChildren();const canvas=el('div','studio-gantt-canvas'),axis=el('div','gx-axis');axis.append(el('div','gx-axis-title','날짜 / '+ZONES[$('studio-chart-zone').value].label));const hours=el('div','gx-hours');for(let h=0;h<24;h++)hours.append(el('span','',String(h).padStart(2,'0')+':00'));axis.append(hours);canvas.append(axis);
   const all=events(),zone=$('studio-chart-zone').value;
   for(const date of datesShown()){
@@ -311,6 +441,7 @@ html,body{height:100%;background:var(--paper)}.trip-studio{width:100vw!important
  gridHost.addEventListener('keydown',event=>{if(event.key!=='Enter'||event.target.tagName==='TEXTAREA')return;const line=event.target.closest('tr[data-id]');if(!line)return;event.preventDefault();const rows=Array.from(gridHost.querySelectorAll('tr[data-id]')),index=rows.indexOf(line),next=rows[index+(event.shiftKey?-1:1)];if(next){const target=next.querySelector('[data-field="'+event.target.dataset.field+'"]');if(target&&!target.disabled)target.focus();}});
  gridHost.addEventListener('click',event=>{
   const button=event.target.closest('button[data-action]');if(!button)return;const found=find(button.closest('tr[data-id]').dataset.id);if(!found)return;
+  if(button.dataset.action==='details'){const line=button.closest('tr[data-id]'),expand=!compactExpanded.has(found.item.id);if(expand)compactExpanded.add(found.item.id);else compactExpanded.delete(found.item.id);line.classList.toggle('compact-expanded',expand);button.textContent=expand?'상세 접기':'상세 편집';button.setAttribute('aria-expanded',String(expand));return;}
   if(button.dataset.action==='delete'){if(locked(found.item))return;if(!confirm('이 일정과 메모를 삭제할까요? 실행 취소로 복구할 수 있습니다.'))return;push();data.days[found.date].rows.splice(found.index,1);}
   else{if(data.days[found.date].rows.length>=100){status('하루 최대 100개입니다.',true);return;}push();data.days[found.date].rows.splice(found.index+1,0,{...found.item,id:uid(),state:'draft'});}
   save();render();
