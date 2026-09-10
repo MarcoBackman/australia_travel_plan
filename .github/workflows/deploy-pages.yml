@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - index.html
+      - recommended-itinerary.html
       - .github/workflows/deploy-pages.yml
   workflow_dispatch:
 
@@ -38,6 +39,7 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html _site/index.html
+          cp recommended-itinerary.html _site/recommended-itinerary.html
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v4
