@@ -3,18 +3,18 @@
 const storageKey='australia-honeymoon-2026-plan-v1';
 const costRows=[
  {id:'flight',label:'케언스 → 시드니 국내선',detail:'JQ959 예약 완료 / 1인 × 2명 / 결제액 미제공: 추정값',qty:2,value:230,group:'transport'},
- {id:'cairns',label:'케언스 숙박',detail:'총 숙소 300만원 계획 / 객실 1개 1박 × 5박',qty:5,value:210,group:'stay'},
+ {id:'cairns',label:'포트더글라스 숙박',detail:'총 숙소 300만원 계획 / 객실 1개 1박 × 5박',qty:5,value:240,group:'stay'},
  {id:'sydney',label:'시드니 숙박',detail:'총 숙소 300만원 계획 / 객실 1개 1박 × 4박',qty:4,value:310,group:'stay'},
- {id:'early',label:'도착일 오전 객실 확보',detail:'조기 입실 또는 전날 1박 / 5박 비용과 중복 금지',qty:1,value:210,group:'stay'},
- {id:'freedive',label:'프리다이빙 투어 1회',detail:'공개 시작가 1인 × 성인 2명',qty:2,value:360,group:'sea'},
- {id:'reef',label:'10/17 두 번째 프리다이빙',detail:'선택 상품 1인 단가 × 성인 2명 / 지정일 견적 필요',qty:2,value:360,group:'sea'},
- {id:'ferry',label:'피츠로이섬 왕복 페리',detail:'1인 왕복 × 성인 2명 / 식사·장비 별도',qty:2,value:109,group:'sea'},
+ {id:'early',label:'도착일 오전 객실 확보',detail:'조기 입실 또는 전날 1박 / 5박 비용과 중복 금지',qty:1,value:240,group:'stay'},
+ {id:'freedive',label:'ABC 프리다이빙 후보',detail:'일반 스노클 공개가 참고 / 프리다이빙 견적 별도 / 1인 × 2명',qty:2,value:547.5,group:'sea'},
+ {id:'reef',label:'10/17 현지 출발 스노클링',detail:'Wavelength A$329 또는 Calypso A$319 참고 / 1인 × 2명',qty:2,value:329,group:'sea'},
+ {id:'ferry',label:'추가 선택 활동',detail:'기본 0 / 추가 선택 상품 1인 × 2명',qty:2,value:0,group:'sea'},
  {id:'car',label:'선택 렌터카 총액',detail:'기본안 0일 / 선택 시 대여·보험·연료·주차 총액',qty:1,value:0,group:'transport'},
- {id:'cnsairport',label:'케언스 공항 왕복',detail:'택시·차량 호출 / 2회 편도 합계 가정',qty:1,value:100,group:'transport'},
+ {id:'cnsairport',label:'CNS ↔ 포트더글라스',detail:'전용차 1–5인 왕복 공개 참고 / 장비·실제 편 배차 확인',qty:1,value:580,group:'transport'},
  {id:'sydairport',label:'시드니 공항 왕복',detail:'택시·차량 호출 / 2회 편도 합계 가정',qty:1,value:160,group:'transport'},
  {id:'city',label:'시드니 시내 대중교통',detail:'체류 기간 2인 합계 / 공항 제외',qty:1,value:80,group:'transport'},
  {id:'citytaxi',label:'시드니 구간 택시',detail:'10/22 두 구간 / 2인 차량 합계 가정',qty:1,value:80,group:'transport'},
- {id:'geartransfer',label:'선택 장비 매장 왕복',detail:'기본 0 / 매장 선택 시 4회 편도 총액 입력',qty:1,value:0,group:'transport'},
+ {id:'geartransfer',label:'ABC 시내 투어 송영',detail:'왕복 A$20/인 × 2명 / 적용 여부 확인',qty:1,value:40,group:'transport'},
  {id:'food',label:'식사·카페',detail:'2인 하루 예산 × 10일',qty:10,value:150,group:'other'},
  {id:'misc',label:'통신·여행보험·소액 입장료',detail:'2인 합계 / 개별 상품 견적 아님',qty:1,value:225,group:'other'}
 ];
@@ -26,15 +26,15 @@ let stored={};let canStore=true;
 try{const parsed=JSON.parse(localStorage.getItem(storageKey)||'{}');if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))stored=parsed;}catch(e){canStore=false;}
 function validNumber(value,min,max){return value!==''&&value!==null&&value!==undefined&&Number.isFinite(Number(value))&&Number(value)>=min&&Number(value)<=max;}
 for(const [key,value] of Object.entries(defaults)){const node=el(key);const saved=stored[key];node.value=validNumber(saved,Number(node.min),Number(node.max))?saved:value;}
-el('reef-choice').value=stored.reefChoice==='snorkel'?'snorkel':'freedive';
+el('reef-choice').value=stored.reefChoice==='calypso'?'calypso':'wavelength';
 for(const row of costRows){
  const tr=document.createElement('tr');const name=document.createElement('td');const label=document.createElement('strong');label.id='label-'+row.id;label.textContent=row.label;const detail=document.createElement('small');detail.textContent=row.detail;name.append(label,detail);
  const valueCell=document.createElement('td');const input=document.createElement('input');input.type='number';input.min='0';input.max='100000';input.step='0.01';input.inputMode='decimal';input.id='cost-'+row.id;input.setAttribute('aria-label',row.label+' 단가 호주달러');
- const fallback=row.id==='reef'?(el('reef-choice').value==='freedive'?360:317):row.value;
+ const fallback=row.id==='reef'?(el('reef-choice').value==='calypso'?319:329):row.value;
  input.value=stored.costs&&validNumber(stored.costs[row.id],0,100000)?stored.costs[row.id]:fallback;valueCell.append(input);
  const sum=document.createElement('td');sum.id='sum-'+row.id;sum.className='num';tr.append(name,valueCell,sum);el('budget-rows').append(tr);
 }
-function updateReefLabel(){el('label-reef').textContent=el('reef-choice').value==='freedive'?'10/17 두 번째 프리다이빙':'10/17 Moore Reef 투어';}
+function updateReefLabel(){el('label-reef').textContent=el('reef-choice').value==='calypso'?'10/17 Calypso 스노클링':'10/17 Wavelength 스노클링';}
 updateReefLabel();
 for(const checkbox of document.querySelectorAll('[data-check]')){checkbox.checked=!!(stored.checks&&stored.checks[checkbox.dataset.check]);checkbox.addEventListener('change',()=>{updateChecks();save();});}
 function updateChecks(){if(el('check-status'))el('check-status').textContent='완료 '+document.querySelectorAll('[data-check]:checked').length+' / 6';}
@@ -67,8 +67,8 @@ function calculate(persist=true){
  if(persist)save();el('budget-status').textContent=canStore?'입력한 예산은 이 브라우저에 자동 저장됩니다.':'이 환경에서는 자동 저장을 사용할 수 없습니다. 현재 화면의 계산은 이용할 수 있습니다.';
 }
 for(const input of document.querySelectorAll('#budget input'))input.addEventListener('input',()=>calculate());
-el('reef-choice').addEventListener('change',()=>{el('cost-reef').value=el('reef-choice').value==='freedive'?360:317;updateReefLabel();calculate();});
-el('reset-budget').addEventListener('click',()=>{for(const [key,value] of Object.entries(defaults))el(key).value=value;for(const row of costRows)el('cost-'+row.id).value=row.value;el('reef-choice').value='freedive';updateReefLabel();calculate();});
+el('reef-choice').addEventListener('change',()=>{el('cost-reef').value=el('reef-choice').value==='calypso'?319:329;updateReefLabel();calculate();});
+el('reset-budget').addEventListener('click',()=>{for(const [key,value] of Object.entries(defaults))el(key).value=value;for(const row of costRows)el('cost-'+row.id).value=row.value;el('reef-choice').value='wavelength';updateReefLabel();calculate();});
 el('print-button')?.addEventListener('click',()=>{const opened=[];for(const item of document.querySelectorAll('details')){if(!item.open){item.open=true;opened.push(item);}}const restore=()=>{for(const item of opened)item.open=false;window.removeEventListener('afterprint',restore);};window.addEventListener('afterprint',restore);window.print();});
 function renderBudgetVisualization(groups,total,rate){
  let chart=el('budget-visualization');
@@ -87,7 +87,7 @@ updateChecks();calculate(false);
 
 (function(){let previous=null;
  const apply=values=>{previous=Object.fromEntries(Object.keys(values).map(k=>[k,el('cost-'+k).value]));for(const [k,v] of Object.entries(values))el('cost-'+k).value=v;calculate();el('undo-stay-budget').disabled=false;el('stay-budget-status').textContent='표시된 계획값을 적용했습니다. 다른 항목은 유지했습니다. 마지막 적용 취소로 복구할 수 있습니다.';};
- el('apply-stay-budget').addEventListener('click',()=>{const rate=Number(el('exchange').value);if(!validNumber(el('exchange').value,1,100000)){el('stay-budget-status').textContent='환율을 먼저 올바르게 입력하세요.';return;}const values=Object.fromEntries(Object.entries({cairns:210000,sydney:310000,early:210000}).map(([k,v])=>[k,Math.floor(v/rate*100)/100]));if(Object.values(values).some(v=>v>100000)){el('stay-budget-status').textContent='환율이 너무 작아 입력 범위를 벗어납니다. 환율을 확인하세요.';return;}apply(values);});el('apply-gear-transfer').addEventListener('click',()=>apply({geartransfer:250}));
+ el('apply-stay-budget').addEventListener('click',()=>{const rate=Number(el('exchange').value);if(!validNumber(el('exchange').value,1,100000)){el('stay-budget-status').textContent='환율을 먼저 올바르게 입력하세요.';return;}const values=Object.fromEntries(Object.entries({cairns:240000,sydney:310000,early:240000}).map(([k,v])=>[k,Math.floor(v/rate*100)/100]));if(Object.values(values).some(v=>v>100000)){el('stay-budget-status').textContent='환율이 너무 작아 입력 범위를 벗어납니다. 환율을 확인하세요.';return;}apply(values);});el('apply-gear-transfer').addEventListener('click',()=>apply({geartransfer:40})); el('apply-port-budget').addEventListener('click',()=>{const rate=Number(el('exchange').value);if(!validNumber(el('exchange').value,1,100000))return;apply({cairns:Math.floor(240000/rate*100)/100,sydney:Math.floor(310000/rate*100)/100,early:Math.floor(240000/rate*100)/100,freedive:547.5,reef:el('reef-choice').value==='calypso'?319:329,ferry:0,car:0,cnsairport:580,geartransfer:40});});
  el('undo-stay-budget').addEventListener('click',()=>{if(!previous)return;for(const [k,v] of Object.entries(previous))el('cost-'+k).value=v;previous=null;calculate();el('undo-stay-budget').disabled=true;el('stay-budget-status').textContent='마지막 버튼 적용 전 금액으로 복구했습니다.';});
 })();
 
