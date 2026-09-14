@@ -5,7 +5,7 @@
   function restore(){if(held){held.template.content.append(...body.childNodes);held=null;}else body.replaceChildren();activeId='';}
   function setupContent(){
     body.querySelectorAll('[id]').forEach(node=>{const existing=document.getElementById(node.id);if(existing!==node)node.removeAttribute('id');});
-    const bag=body.querySelector('#bag-result');if(bag&&!initialized.has(bag))loadScript('assets/baggage.js?v=port-20260914').then(()=>{if(body.contains(bag)&&!initialized.has(bag)){window.initBaggageGuide();initialized.add(bag);}}).catch(()=>{bag.textContent='계산기를 불러오지 못했습니다. 모달을 다시 열어주세요.';});
+    const bag=body.querySelector('#bag-result');if(bag&&!initialized.has(bag))loadScript('assets/baggage.js?v=booked-20260914').then(()=>{if(body.contains(bag)&&!initialized.has(bag)){window.initBaggageGuide();initialized.add(bag);}}).catch(()=>{bag.textContent='계산기를 불러오지 못했습니다. 모달을 다시 열어주세요.';});
     const entry=body.querySelector('#entry-copy-inquiry');if(entry&&!initialized.has(entry))loadScript('assets/entry.js?v=port-20260914').then(()=>{if(body.contains(entry)&&!initialized.has(entry)){window.initEntryPreparation();initialized.add(entry);}}).catch(()=>{});
   }
   function loadScript(src){if(!scriptLoads.has(src))scriptLoads.set(src,new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=resolve;script.onerror=()=>{scriptLoads.delete(src);reject();};document.body.append(script);}));return scriptLoads.get(src);}
