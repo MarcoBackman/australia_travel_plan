@@ -220,6 +220,7 @@
   }host.append(canvas);
  }
  function render(){
+  const mapLink=document.getElementById('studio-map-link');if(mapLink)mapLink.dataset.tripDay=filter;
   editToken='';$('studio-grid-view').hidden=view!=='grid';$('studio-gantt-view').hidden=view!=='gantt';
   modal.querySelectorAll('[data-studio-view]').forEach(button=>{button.setAttribute('aria-pressed',String(button.dataset.studioView===view));if(button.dataset.studioView==='grid')button.textContent=mobileScreen.matches?'카드 편집':'표 편집';});
   $('studio-help').textContent=view==='grid'?'셀을 눌러 편집 · Tab으로 다음 셀 · 행 손잡이를 다른 날짜에 드래그':'막대를 다른 날짜·시간으로 드래그 · 15분 단위 · 소요시간 유지 · 더블클릭으로 표 편집';

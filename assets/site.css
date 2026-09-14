@@ -29,3 +29,6 @@ html.studio-open:has(.planner-embedded){overflow:hidden}.planner-embedded>.site-
 @media(max-width:1000px){.planner-launchers button{font-size:12px;padding:7px 9px}}
 @media(max-width:700px){.hero-actions{flex-wrap:wrap}.planner-launchers button{font-size:12px;padding:6px 10px}.planner-modal{width:100vw;height:100dvh;border:0;border-radius:0}.planner-modal-head{padding:12px 14px;gap:12px}.planner-modal-head h2{font-size:20px}.planner-modal-head p{font-size:7px;letter-spacing:.5px}.planner-full-page{font-size:11px}.planner-modal-head .dialog-close{width:36px;height:36px}.planner-loading{padding:12px 14px}.planner-embedded .studio-content{overscroll-behavior:contain}}
 .portal.planner-embedded{padding:0!important}
+
+.hero-actions{flex-wrap:wrap}.minimap-feature{background:#17353c;color:#e9f6eb;border-color:#315861}.minimap-feature p,.minimap-feature .feature-no,.minimap-feature .feature-arrow{color:#acd4bc}.minimap-feature:hover{background:#244850}.modal-day-head .btn{margin:4px}
+#studio-map-link{white-space:nowrap}@media(max-width:700px){.workspace-page #studio-map-link{font-size:10px;padding:7px 9px;min-height:36px}.workspace-page .studio-tools{flex-wrap:wrap}}
