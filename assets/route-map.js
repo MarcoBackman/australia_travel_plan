@@ -28,7 +28,8 @@
   const modeNames={flight:'항공 · 개략선',sea:'보트·페리 · 개략선',walk:'도보',drive:'차량',transit:'대중교통 · 개략선',link:'일정 사이 연결'};
   let day=D.dates.includes(params.get('day'))?params.get('day'):params.get('day')==='all'?'all':D.dates[1];
   let state=D.read(),pins=D.readPins(),events=[],legs=[],selected=0,map=null,routeLayer,poiLayer,markerLayer,playing=null,epoch=0,requestController=null,lastRequest=0,pinOpener=null;
-  let lastSignature='',selectedSignature='',pointMarkers=new Map(),routeCache=new Map();
+  let lastSignature='',selectedSignature='',pointMarkers=new Map(),routeCache=new Map(),routeLines=[],cameraReady=false,cameraMotion=null;
+  const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
   const coord=p=>[p.lat,p.lng],quality=p=>p.quality==='custom'?'직접 지정':p.quality==='area'?'권역 대표 · 장소 미확정':'대표 위치';
   const endLabel=e=>(e.end||'미정')+(e.endDay?' (+'+e.endDay+'일)':'');
   const post=message=>{if(embedded)parent.postMessage(message,location.origin);};
@@ -38,14 +39,41 @@
   function routeKey(leg){return [leg.kind,leg.a.lat,leg.a.lng,leg.b.lat,leg.b.lng].join('|');}
   function currentLeg(){const list=legs.filter(l=>l.index===selected);return list.find(l=>!l.connector)||list[0];}
   function allPoints(){return events.flatMap(e=>e.stops.map(s=>s.point).filter(Boolean));}
-  function stopPlayback(){if(playing)clearInterval(playing);playing=null;$('map-play').textContent='▶ 순서 재생';$('map-play').setAttribute('aria-pressed','false');}
+  function stopCamera(){
+    if(cameraMotion)cameraMotion.finish(false);
+    if(cameraReady)map.stop();
+  }
+  function stopPlayback(){if(playing)clearTimeout(playing.timer);playing=null;stopCamera();$('map-play').textContent='▶ 순서 재생';$('map-play').setAttribute('aria-pressed','false');}
   function invalidateRequest(){epoch++;if(requestController)requestController.abort();requestController=null;}
-  function fit(points){if(!map||!points.length)return;map.fitBounds(points.map(coord),{padding:[60,55],maxZoom:15,animate:false});}
+  function fit(points,maxZoom=15){
+    if(!map||!points.length)return Promise.resolve(true);
+    stopCamera();
+    const bounds=L.latLngBounds(points.map(p=>Array.isArray(p)?p:coord(p))),options={padding:[60,55],maxZoom};
+    // Set the initial view once. Every subsequent destination uses the same moving map.
+    if(!cameraReady||reducedMotion.matches){map.fitBounds(bounds,{...options,animate:false});cameraReady=true;return Promise.resolve(true);}
+    const zoom=Math.min(maxZoom,map.getBoundsZoom(bounds,false,L.point(120,110))),center=bounds.getCenter();
+    const distance=map.project(map.getCenter(),zoom).distanceTo(map.project(center,zoom))/Math.max(1,map.getSize().x);
+    const duration=Math.min(3.6,1.1+Math.log2(1+distance)*.35+Math.abs(map.getZoom()-zoom)*.13);
+    return new Promise(resolve=>{
+      let timeout;
+      const motion={finish:completed=>{if(cameraMotion!==motion)return;map.off('moveend',onEnd);clearTimeout(timeout);cameraMotion=null;resolve(completed);}};
+      const onEnd=()=>motion.finish(true);
+      cameraMotion=motion;map.once('moveend',onEnd);
+      // A hidden/resized map must not leave playback waiting indefinitely.
+      timeout=setTimeout(()=>motion.finish(true),duration*1000+1200);
+      map.flyToBounds(bounds,{...options,duration});
+    });
+  }
+  function highlightSelection(){
+    for(const {line,leg} of routeLines){const active=leg.index===selected;line.setStyle({color:active?'#e7f5a0':routeColors[leg.kind],weight:active?5:2.5,opacity:active?.95:.64});line.getElement()?.classList.toggle('map-selected-path',active);}
+    for(const {marker,indices} of pointMarkers.values()){const active=indices.includes(selected);marker.getElement()?.querySelector('.map-pin-dot')?.classList.toggle('is-selected',active);marker.setZIndexOffset(active?800:100);}
+  }
   function drawRoutes(){
-    if(!map)return;routeLayer.clearLayers();
+    if(!map)return;routeLayer.clearLayers();routeLines=[];
     for(const leg of legs){
       const cached=routeCache.get(routeKey(leg)),active=leg.index===selected;
-      const line=L.polyline(cached?cached.coords:[coord(leg.a),coord(leg.b)],{color:active?'#e7f5a0':routeColors[leg.kind],weight:active?5:2.5,opacity:active?.95:.64,dashArray:cached?undefined:leg.kind==='flight'?'10 9':'5 7',className:active?'map-selected-path':''}).addTo(routeLayer);
+      const line=L.polyline(cached?cached.coords:[coord(leg.a),coord(leg.b)],{color:active?'#e7f5a0':routeColors[leg.kind],weight:active?5:2.5,opacity:active?.95:.64,dashArray:cached?undefined:leg.kind==='flight'?'10 9':'5 7',className:'map-route-path'+(active?' map-selected-path':'')}).addTo(routeLayer);
+      routeLines.push({line,leg});
       line.bindTooltip((cached?'조회 경로 · ':'개략 연결 · ')+modeNames[leg.kind]+' · '+leg.a.name+' → '+leg.b.name,{sticky:true});
       line.on('click',()=>selectEvent(leg.index,false,true));
     }
@@ -59,7 +87,7 @@
       const labelMarker=()=>marker.getElement()?.setAttribute('aria-label',point.name+' · 일정 '+indices.map(i=>i+1).join(', '));
       marker.on('add',labelMarker);labelMarker();
       marker.bindTooltip(esc(point.name)+' · '+quality(point));
-      marker.on('click',()=>{selectEvent(indices.includes(selected)?selected:indices[0],false,true);details();});pointMarkers.set(point.id,marker);
+      marker.on('click',()=>{selectEvent(indices.includes(selected)?selected:indices[0],false,true);details();});pointMarkers.set(point.id,{marker,indices});
     }
     if($('map-poi').getAttribute('aria-pressed')==='true'){
       const zones=new Set(allPoints().map(p=>p.zone));
@@ -72,11 +100,13 @@
   function initMap(){
     if(!window.L){$('trip-route-map').innerHTML='<p class="map-loading">지도 연결에 실패했습니다. 이동 목록·상세 내용과 외부 지도 링크를 이용해 주세요.</p>';return;}
     $('trip-route-map').replaceChildren();
-    map=L.map('trip-route-map',{zoomControl:false,scrollWheelZoom:false,minZoom:2,maxZoom:18});L.control.zoom({position:'topright'}).addTo(map);
-    const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener">지도 수정</a> · 경로 <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener">OSRM / FOSSGIS</a>'}).addTo(map);
+    map=L.map('trip-route-map',{zoomControl:false,scrollWheelZoom:false,minZoom:2,maxZoom:18,zoomSnap:0,zoomAnimation:!reducedMotion.matches,fadeAnimation:!reducedMotion.matches});L.control.zoom({position:'topright'}).addTo(map);
+    const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:4,updateWhenIdle:false,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener">지도 수정</a> · 경로 <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener">OSRM / FOSSGIS</a>'}).addTo(map);
     tiles.on('tileerror',()=>{$('map-tile-status').hidden=false;$('map-tile-status').textContent='배경 지도 일부를 불러오지 못했습니다. 일정과 연결선은 계속 볼 수 있습니다.';});
     L.control.scale({imperial:false,position:'bottomleft',maxWidth:100}).addTo(map);
     routeLayer=L.layerGroup().addTo(map);poiLayer=L.layerGroup().addTo(map);markerLayer=L.layerGroup().addTo(map);
+    map.getContainer().addEventListener('pointerdown',stopPlayback);
+    map.getContainer().addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','+','-','=','Enter',' '].includes(e.key))stopPlayback();});
     new ResizeObserver(()=>map.invalidateSize({pan:false})).observe($('trip-route-map'));
   }
   function renderList(){
@@ -106,17 +136,20 @@
       $('map-selected-tags').innerHTML='<span>'+stateName+'</span><span>'+esc(event.transport||'미정')+'</span><span>'+esc(event.startZone==='KR'?'한국·일본 UTC+9':event.startZone==='CNS'?'포트더글라스·CNS UTC+10':'시드니 UTC+11')+(event.startZone!==event.endZone?' → '+esc(event.endZone==='SYD'?'SYD UTC+11':event.endZone==='KR'?'한국 UTC+9':'CNS UTC+10'):'')+'</span>';
     }else{$('map-selected-time').textContent='—';$('map-selected-title').textContent='등록된 일정이 없습니다';$('map-selected-place').textContent='';$('map-selected-tags').replaceChildren();selectedSignature='';}
     document.querySelectorAll('.map-event').forEach((b,i)=>{if(i===selected)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
-    $('map-progress').value=selected;$('map-step-count').textContent=(event?selected+1:0)+' / '+events.length;drawRoutes();drawMarkers();describeRoute();
-    if(focus&&event){const leg=currentLeg(),points=leg?[leg.a,leg.b]:event.stops.map(s=>s.point).filter(Boolean);fit(points);}
-    const button=$('map-events').children[selected]?.firstChild;if(button&&playing)button.scrollIntoView({block:'nearest',behavior:'auto'});
+    $('map-progress').value=selected;$('map-step-count').textContent=(event?selected+1:0)+' / '+events.length;highlightSelection();describeRoute();
+    let movement=Promise.resolve(true);
+    if(focus&&event){const leg=currentLeg(),points=leg?(routeCache.get(routeKey(leg))?.coords||[leg.a,leg.b]):event.stops.map(s=>s.point).filter(Boolean);movement=fit(points);}
+    const list=$('map-events'),button=list.children[selected]?.firstChild;
+    if(button&&playing){const item=button.getBoundingClientRect(),viewport=list.getBoundingClientRect();if(item.top<viewport.top||item.bottom>viewport.bottom)list.scrollTo({top:list.scrollTop+item.top-viewport.top-8,behavior:reducedMotion.matches?'auto':'smooth'});}
+    return movement;
   }
   function renderDay(keepSelection=false){
     const old=selectedSignature,oldIndex=selected;stopPlayback();invalidateRequest();
     const rows=day==='all'?D.dates.flatMap(d=>state.days[d]):state.days[day];({events,legs}=D.build(rows,pins));
     $('map-day').value=day;$('map-prev-day').disabled=day===D.dates[0];$('map-next-day').disabled=day===D.dates.at(-1);
     $('map-day-title').textContent=day==='all'?'11일의 여행 경로':Number(day.slice(-2))+'일의 이동 순서';$('map-event-count').textContent=String(events.length).padStart(2,'0');$('map-empty').hidden=!!events.length;
-    $('map-progress').max=Math.max(0,events.length-1);renderList();const found=keepSelection?events.findIndex(e=>e.key===old):-1;selectEvent(keepSelection?(found>=0?found:oldIndex):0,false);fit(allPoints());
-    if(map&&!allPoints().length)map.setView([-16.4837,145.4639],12);
+    $('map-progress').max=Math.max(0,events.length-1);renderList();drawRoutes();drawMarkers();const found=keepSelection?events.findIndex(e=>e.key===old):-1;selectEvent(keepSelection?(found>=0?found:oldIndex):0,false);
+    const points=allPoints();fit(points.length?points:[{lat:-16.4837,lng:145.4639}],points.length?15:12);
     const missing=events.filter(e=>e.stops.some(s=>!s.point)).length;
     $('map-warning').textContent=[state.error,missing?missing+'개 일정에 미정 위치가 있습니다. 리프 포인트·지정 선착장은 예약서 확인 후 위치를 지정하세요.':'숙소·식당 권역의 핀은 대표 위치이며 예약 확정 장소가 아닙니다.'].filter(Boolean).join(' ');
     $('map-sync-status').textContent=state.error?'기본안 포함 · 확인 필요':state.usesSaved?'저장된 일정 연결됨':'기본 추천 일정 연결됨';
@@ -145,7 +178,7 @@
   }
   async function requestRoad(){
     const leg=currentLeg();if(!leg||!['walk','drive'].includes(leg.kind))return;stopPlayback();
-    const key=routeKey(leg);if(routeCache.has(key)){drawRoutes();describeRoute();fit([leg.a,leg.b]);return;}
+    const key=routeKey(leg);if(routeCache.has(key)){drawRoutes();describeRoute();fit(routeCache.get(key).coords,16);return;}
     let globalLast=0;try{globalLast=Number(localStorage.getItem('australia-map-route-request-at')||0);}catch(e){}
     const now=Date.now();if(now-Math.max(lastRequest,globalLast)<1100){$('map-route-status').textContent='잠시 뒤 다시 눌러 주세요. 경로는 한 번에 하나씩 조회합니다.';return;}lastRequest=now;try{localStorage.setItem('australia-map-route-request-at',String(now));}catch(e){}
     invalidateRequest();const currentEpoch=epoch,controller=new AbortController();requestController=controller;const timeout=setTimeout(()=>controller.abort(),9000);$('map-road').disabled=true;$('map-route-status').textContent='선택한 '+modeNames[leg.kind]+' 경로를 조회하고 있습니다…';
@@ -157,16 +190,23 @@
       if(data.waypoints?.some(p=>p.distance>1500))throw Error('too far from roads');
       const coords=route.geometry.coordinates.map(p=>[p[1],p[0]]);if(coords.some(p=>p.length!==2||p.some(n=>!Number.isFinite(n))||Math.abs(p[0])>90||Math.abs(p[1])>180))throw Error('coordinates');
       routeCache.set(key,{coords,distance:route.distance});if(routeCache.size>50)routeCache.delete(routeCache.keys().next().value);
-      if(currentEpoch!==epoch)return;drawRoutes();describeRoute();if(map)map.fitBounds(coords,{padding:[60,60],maxZoom:16,animate:false});
+      if(currentEpoch!==epoch)return;drawRoutes();describeRoute();fit(coords,16);
     }catch(error){if(currentEpoch===epoch)$('map-route-status').textContent='경로를 조회하지 못했습니다. 점선은 개략 연결이며 실제 길은 외부 지도에서 확인하세요.';}
     finally{clearTimeout(timeout);if(currentEpoch===epoch){requestController=null;$('map-road').disabled=false;}}
   }
   $('map-day').addEventListener('change',e=>setDay(e.target.value));
   $('map-prev-day').addEventListener('click',()=>setDay(D.dates[Math.max(0,D.dates.indexOf(day)-1)]));
   $('map-next-day').addEventListener('click',()=>setDay(D.dates[Math.min(10,D.dates.indexOf(day)+1)]));
-  $('map-fit').addEventListener('click',()=>fit(allPoints()));$('map-poi').addEventListener('click',()=>{$('map-poi').setAttribute('aria-pressed',String($('map-poi').getAttribute('aria-pressed')!=='true'));drawMarkers();});
+  $('map-fit').addEventListener('click',()=>{stopPlayback();fit(allPoints());});$('map-poi').addEventListener('click',()=>{$('map-poi').setAttribute('aria-pressed',String($('map-poi').getAttribute('aria-pressed')!=='true'));drawMarkers();});
   $('map-progress').addEventListener('input',e=>selectEvent(Number(e.target.value),true,true));
-  $('map-play').addEventListener('click',()=>{if(playing){stopPlayback();return;}if(selected>=events.length-1)selectEvent(0,true);$('map-play').textContent='Ⅱ 재생 멈춤';$('map-play').setAttribute('aria-pressed','true');playing=setInterval(()=>{if(selected>=events.length-1){stopPlayback();return;}selectEvent(selected+1,true);},2400);});
+  async function playStep(run,index){
+    const completed=await selectEvent(index,true);
+    if(playing!==run||!completed)return;
+    if(selected>=events.length-1){stopPlayback();return;}
+    run.timer=setTimeout(()=>playStep(run,selected+1),1300);
+  }
+  $('map-play').addEventListener('click',()=>{if(playing){stopPlayback();return;}const run={timer:null};playing=run;$('map-play').textContent='Ⅱ 재생 멈춤';$('map-play').setAttribute('aria-pressed','true');playStep(run,selected>=events.length-1?0:selected);});
+  reducedMotion.addEventListener('change',()=>{stopPlayback();if(map){map.options.zoomAnimation=!reducedMotion.matches;map.options.fadeAnimation=!reducedMotion.matches;}});
   $('map-details').addEventListener('click',details);$('map-pin').addEventListener('click',openPin);$('map-road').addEventListener('click',requestRoad);$('map-edit').addEventListener('click',edit);
   window.addEventListener('storage',e=>{if([D.KEY,D.PINS,'australia-recommended-itinerary-photo-2026-v2',null].includes(e.key))refresh();});window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPlayback();else refresh();});
   document.addEventListener('keydown',e=>{if(embedded&&e.key==='Escape'&&!e.defaultPrevented&&!document.querySelector('dialog:modal')){e.preventDefault();stopPlayback();post({type:'australia-recommended-close'});}});
