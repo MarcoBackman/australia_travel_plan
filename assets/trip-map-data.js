@@ -8,6 +8,15 @@
     ['kix','간사이공항',34.4347,135.244,'airport','KR'],
     ['cns','케언스공항',-16.8765,145.7553,'airport','CNS'],
     ['syd','시드니공항',-33.9399,151.1753,'airport','SYD'],
+    ['trinity-stay','Trinity Collective · Trinity Beach 권역 근사 위치, 입구 아님',-16.802,145.690,'stay','CNS','area'],
+    ['smithfield-food','Smithfield · 북부 식당 권역, 점포 미정',-16.833,145.692,'food','CNS','area'],
+    ['smithfield-shop','Smithfield · 식료품점 권역, 점포 미정',-16.833,145.692,'shop','CNS','area'],
+    ['cairns-aquarium','Cairns Aquarium · 시설 권역 대표점',-16.917,145.773,'museum','CNS','area'],
+    ['cairns-gardens','Cairns Botanic Gardens · 정원 권역 대표점',-16.900,145.748,'park','CNS','area'],
+    ['cairns-pool','Tobruk Memorial Pool · 시설 권역 대표점',-16.902,145.757,'pool','CNS','area'],
+    ['cairns-stay','케언스 시내 숙소 권역 · 미예약',-16.920,145.773,'stay','CNS','area'],
+    ['cairns-food','케언스 시내 식당·휴식 권역 · 가상 대표점',-16.919,145.775,'food','CNS','area'],
+    ['cairns-groceries','케언스 시내 식료품점 권역 · 점포 미정',-16.922,145.771,'shop','CNS','area'],
     ['port-stay','포트더글라스 숙소 권역',-16.487,145.464,'stay','CNS','area'],
     ['macrossan','Macrossan Street · 식당 권역',-16.4837,145.4639,'food','CNS','area'],
     ['fourmile','Four Mile Beach 북쪽',-16.4891,145.4693,'beach','CNS'],
@@ -70,6 +79,15 @@
     if(custom&&typeof custom.name==='string'&&typeof custom.lat==='number'&&typeof custom.lng==='number'&&Number.isFinite(custom.lat)&&Number.isFinite(custom.lng)&&Math.abs(custom.lat)<=85&&Math.abs(custom.lng)<=180)return {id:key,...custom,quality:'custom',kind:'pin',zone,manual:true};
     const s=norm(text);let id='';
     if(/wynyard|윈야드/.test(s))return byId['syd-stay'];
+    if(/trinity collective|트리니티 콜렉티브/.test(s))return byId['trinity-stay'];
+    if(/smithfield.*식료품/.test(s))return byId['smithfield-shop'];
+    if(/smithfield.*식당/.test(s))return byId['smithfield-food'];
+    if(/cairns aquarium|케언스 아쿠아리움/.test(s))return byId['cairns-aquarium'];
+    if(/cairns botanic|케언스 식물원|tank sixty four/.test(s))return byId['cairns-gardens'];
+    if(/tobruk.*cairns|토브룩/.test(s))return byId['cairns-pool'];
+    if(/케언스 시내 숙소/.test(s))return byId['cairns-stay'];
+    if(/케언스 시내 식료품/.test(s))return byId['cairns-groceries'];
+    if(/케언스 시내 (식당|휴식)/.test(s))return byId['cairns-food'];
     if(/outer|외해|리프|reef|선내|지정.*(선착장|반납|하선)|marano|independence/.test(s)&&!/abc.*macrossan/.test(s))return null;
     const rules=[[/\bicn\b|인천.*공항/,'icn'],[/\bkix\b|간사이/,'kix'],[/\bcns\b|케언스.*공항/,'cns'],[/\bsyd\b|시드니.*공항/,'syd'],[/crystalbrook|superyacht/,'marina'],[/abc.*macrossan/,'abc'],[/four mile/,'fourmile'],[/rex smeal/,'rex'],[/슈퍼|장보기/,'market'],[/manly wharf/,'manly-wharf'],[/manly beach/,'manly-beach'],[/shelly/,'shelly'],[/circular quay/,'quay'],[/opera/,'opera'],[/queen victoria|\bqvb\b/,'qvb'],[/george street/,'george'],[/darling/,'darling'],[/botanic/,'garden'],[/art gallery|주립미술관/,'gallery'],[/domain/,'domain'],[/newtown/,'newtown'],[/surry/,'surry'],[/paddington/,'paddington'],[/bondi/,'bondi'],[/the rocks/,'rocks'],[/barangaroo/,'barangaroo']];
     for(const [pattern,target]of rules)if(pattern.test(s)){id=target;break;}

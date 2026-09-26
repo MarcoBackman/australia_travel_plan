@@ -3,7 +3,7 @@
  const KEY='australia-recommended-portdouglas-2026-v1',DAY=86400000;
  const DATES=Array.from({length:11},(_,i)=>'2026-10-'+String(i+13).padStart(2,'0'));
  const WEEK=['화','수','목','금','토','일','월','화','수','목','금'];
- const ZONES={KR:{label:'한국·일본 +9',offset:9},CNS:{label:'포트더글라스·CNS +10',offset:10},SYD:{label:'시드니 +11',offset:11}};
+ const ZONES={KR:{label:'한국·일본 +9',offset:9},CNS:{label:'케언스·CNS +10',offset:10},SYD:{label:'시드니 +11',offset:11}};
  const STATES={draft:'계획 중',pending:'예약 확인 필요',confirmed:'예약 완료',done:'다녀옴'};
  const MODES=['미정','도보','보트·페리','항공','택시·차량 호출','대중교통','렌터카','투어 픽업','이동 없음'];
  const $=id=>document.getElementById(id),modal=$('trip-studio');
@@ -27,6 +27,63 @@
  let data=initial(),filter=DATES[1],view='grid',selectedId='',blocked=false,external=null,dirty=false,history=[],future=[],editToken='',dragId='',pointerDrag=null,opener=null;
  try{const raw=localStorage.getItem(KEY);if(raw){data=validate(JSON.parse(raw));status('已저장된 개인 일정을 불러왔습니다.'.replace('已',''));}else {const old=localStorage.getItem('australia-recommended-itinerary-photo-2026-v2');if(old){const previous=validate(JSON.parse(old));for(const d of ['2026-10-13','2026-10-20','2026-10-21','2026-10-22','2026-10-23'])data.days[d]=previous.days[d];const arrival='2026-10-19';const late=previous.days[arrival].rows.filter(r=>r.startZone==='SYD'||r.start>='17:25');data.days[arrival].rows=data.days[arrival].rows.filter(r=>r.start<'17:25');data.days[arrival].rows.push(...late);for(const d of DATES.filter(d=>d>='2026-10-14'&&d<='2026-10-19')){for(const item of previous.days[d].rows.filter(r=>r.state==='confirmed'||r.state==='done')){data.days[d].rows=data.days[d].rows.filter(r=>r.title!==item.title);data.days[d].rows.push(item);}}status('기존 출국·시드니 편집과 확정·완료 행을 이어받았습니다. 북부의 기존 예약은 포트더글라스 동선과 함께 재확인하세요.');}else status('포트더글라스 중심의 새 추천안입니다. 숙소·투어는 미예약입니다.');}}
  catch(e){blocked=true;status('저장소 접근 또는 데이터 형식 오류. 자동 저장 중지. JSON 백업을 이용하세요.',true);}
+ // Back up the entire saved itinerary before replacing only the requested arrival day.
+ const arrivalRevision=KEY+'-cairns-arrival-20260925',arrivalBackup=arrivalRevision+'-backup';
+ try{
+  if(!blocked&&!localStorage.getItem(arrivalRevision)){
+   const date='2026-10-14',protectedRows=data.days[date].rows.filter(r=>r.state==='confirmed'||r.state==='done');
+   if(protectedRows.length){status('14일 예약 완료·다녀옴 행이 있어 자동 교체하지 않았습니다. 보호된 일정을 확인한 뒤 날짜별로 수정하세요.',true);}
+   else{
+    const previous=localStorage.getItem(KEY),backup=previous||JSON.stringify(data);
+    if(!localStorage.getItem(arrivalBackup))localStorage.setItem(arrivalBackup,backup);
+    const next=JSON.parse(JSON.stringify(data));next.days[date]=initial().days[date];
+    localStorage.setItem(KEY,JSON.stringify({...next,updatedAt:new Date().toISOString()}));data=next;
+    localStorage.setItem(arrivalRevision,'applied');
+    status('10/14 케언스 도착·15시 체크인 반영. 이전 전체 일정은 브라우저에 백업했습니다. 다른 날짜의 편집은 유지합니다.');
+   }
+  }
+ }catch(e){blocked=true;status('도착일 변경 저장 중 오류. 자동 저장을 멈췄습니다. 현재 일정을 JSON으로 백업하세요.',true);}
+ const leisureRevision=KEY+'-cairns-leisure-20260925',leisureBackup=leisureRevision+'-backup';
+ try{
+  if(!blocked){
+   const defaults=initial(),next=JSON.parse(JSON.stringify(data));let changed=false;const applied=[];
+   for(const date of ['2026-10-16','2026-10-18']){
+    if(localStorage.getItem(leisureRevision+date))continue;
+    if(data.days[date].rows.some(r=>r.state==='confirmed'||r.state==='done')){status(date+' 예약 완료·다녀옴 행 보호: 아쿠아리움·식물원·수영장 자동 교체를 건너뜁니다.',true);continue;}
+    next.days[date]=defaults.days[date];changed=true;applied.push(date);
+   }
+   if(changed){
+    if(!localStorage.getItem(leisureBackup))localStorage.setItem(leisureBackup,JSON.stringify(data));
+    localStorage.setItem(KEY,JSON.stringify({...next,updatedAt:new Date().toISOString()}));data=next;
+    for(const date of applied)localStorage.setItem(leisureRevision+date,'applied');
+    status(applied.map(d=>d.slice(5)).join(' · ')+' 케언스 관람·수영 일정 반영. 변경 전 전체 일정은 백업했습니다.');
+   }
+  }
+ }catch(e){blocked=true;status('관람·수영 일정 저장 중 오류. 자동 저장 중지. 현재 일정을 백업하세요.',true);}
+ const trinityRevision=KEY+'-trinity-20260926',trinityBackup=trinityRevision+'-backup';
+ try{
+  if(!blocked&&!localStorage.getItem(trinityRevision)){
+   const next=JSON.parse(JSON.stringify(data));
+   for(const date of DATES){const day=Number(date.slice(-2));if(day>=14&&day<=19)next.days[date].rows=next.days[date].rows.map(item=>window.tripTrinityAdjust(day,item));}
+   const airport='2026-10-19',oldEarly=next.days[airport].rows.filter(r=>r.start<'11:30');
+   if(!oldEarly.some(r=>r.state==='confirmed'||r.state==='done')){
+    next.days[airport].rows=[...initial().days[airport].rows.filter(r=>r.start<'11:30'),...next.days[airport].rows.filter(r=>r.start>='11:30')];
+   }
+   if(!localStorage.getItem(trinityBackup))localStorage.setItem(trinityBackup,JSON.stringify(data));
+   localStorage.setItem(KEY,JSON.stringify({...next,updatedAt:new Date().toISOString()}));data=next;
+   localStorage.setItem(trinityRevision,'applied');
+   status('Trinity Collective · 14시 체크인과 북부 이동 반영. 예약 완료·다녀옴 행과 다른 사용자 편집은 보호했습니다.');
+  }
+ }catch(e){blocked=true;status('숙소 변경 저장 중 오류. 자동 저장 중지. 현재 일정과 이전 백업을 보관하세요.',true);}
+ const trinityBackupButton=document.createElement('button');trinityBackupButton.type='button';trinityBackupButton.className='btn';trinityBackupButton.textContent='Trinity 숙소 변경 전 일정 백업 받기';
+ trinityBackupButton.addEventListener('click',()=>{try{const saved=localStorage.getItem(trinityBackup);if(!saved){status('이 브라우저에는 해당 백업이 없습니다.',true);return;}const url=URL.createObjectURL(new Blob([saved],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='itinerary-before-trinity.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){status('백업을 읽지 못했습니다.',true);}});
+ modal.querySelector('.studio-file-menu div').append(trinityBackupButton);
+ const leisureBackupButton=document.createElement('button');leisureBackupButton.type='button';leisureBackupButton.className='btn';leisureBackupButton.textContent='관람·수영 추가 전 일정 백업 받기';
+ leisureBackupButton.addEventListener('click',()=>{try{const saved=localStorage.getItem(leisureBackup);if(!saved){status('이 브라우저에는 해당 백업이 없습니다.',true);return;}const url=URL.createObjectURL(new Blob([saved],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='itinerary-before-cairns-leisure.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){status('백업을 읽지 못했습니다.',true);}});
+ modal.querySelector('.studio-file-menu div').append(leisureBackupButton);
+ const backupButton=document.createElement('button');backupButton.type='button';backupButton.className='btn';backupButton.textContent='케언스 변경 전 일정 백업 받기';
+ backupButton.addEventListener('click',()=>{try{const saved=localStorage.getItem(arrivalBackup);if(!saved){status('이 브라우저에는 변경 전 백업이 없습니다.',true);return;}const url=URL.createObjectURL(new Blob([saved],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='itinerary-before-cairns-arrival.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){status('백업을 읽지 못했습니다.',true);}});
+ modal.querySelector('.studio-file-menu div').append(backupButton);
  function save(){dirty=true;if(blocked){status('자동 저장 중지. 현재 내용을 JSON으로 백업하세요.',true);return;}try{localStorage.setItem(KEY,JSON.stringify({...data,updatedAt:new Date().toISOString()}));dirty=false;status('자동 저장됨 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));}catch(e){status('저장 실패. 닫기 전에 JSON으로 백업하세요.',true);}}
  function snapshot(){return JSON.stringify(data);}
  function push(){history.push(snapshot());if(history.length>50)history.shift();future=[];editToken='';historyButtons();}
