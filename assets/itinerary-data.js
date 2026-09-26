@@ -85,3 +85,10 @@ window.tripRefreshConfirmedFlightNotes=function(date,item){
  if(date!=='2026-10-19'||!item.title.includes('JQ959'))return item.notes;
  return item.notes.replace('2026-09-14 사용자 제공 예약 이미지 기준:','예약 확정 · 2026-09-14 사용자 확인:').replace('인당 위탁 30kg·기내 12kg은 사용자 제공 구매 정보이며 사진에는 수하물 항목이 보이지 않습니다. 기내 한도·개별 가방 제한은 예약 상세 확인.','수하물 예약 확정: 1인 위탁 30kg · 기내(carry-on) 12kg.');
 };
+
+// Keep the arrival-day accommodation label aligned with the selected stay.
+window.tripInitialRows=window.tripInitialRows.map(function(item){
+ if(item.day!==14)return item;
+ const fix=function(value){return typeof value==='string'?value.replace(/포트\s*더\s*글라스\s*숙소/g,'Trinity Collective').replace(/포트\s*더\s*글라스/g,'Trinity Beach'):value;};
+ return {...item,title:fix(item.title),place:fix(item.place)};
+});
