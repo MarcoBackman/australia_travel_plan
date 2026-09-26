@@ -8,7 +8,8 @@
     ['kix','간사이공항',34.4347,135.244,'airport','KR'],
     ['cns','케언스공항',-16.8765,145.7553,'airport','CNS'],
     ['syd','시드니공항',-33.9399,151.1753,'airport','SYD'],
-    ['trinity-stay','Trinity Collective · Trinity Beach 권역 근사 위치, 입구 아님',-16.802,145.690,'stay','CNS','area'],
+    ['armour-museum','Australian Armour & Artillery Museum · Smithfield 권역 근사 위치, 입구 아님',-16.85,145.70,'museum','CNS','area'],
+['trinity-stay','Trinity Collective · Trinity Beach 권역 근사 위치, 입구 아님',-16.802,145.690,'stay','CNS','area'],
     ['smithfield-food','Smithfield · 북부 식당 권역, 점포 미정',-16.833,145.692,'food','CNS','area'],
     ['smithfield-shop','Smithfield · 식료품점 권역, 점포 미정',-16.833,145.692,'shop','CNS','area'],
     ['cairns-aquarium','Cairns Aquarium · 시설 권역 대표점',-16.917,145.773,'museum','CNS','area'],
@@ -79,7 +80,8 @@
     if(custom&&typeof custom.name==='string'&&typeof custom.lat==='number'&&typeof custom.lng==='number'&&Number.isFinite(custom.lat)&&Number.isFinite(custom.lng)&&Math.abs(custom.lat)<=85&&Math.abs(custom.lng)<=180)return {id:key,...custom,quality:'custom',kind:'pin',zone,manual:true};
     const s=norm(text);let id='';
     if(/wynyard|윈야드/.test(s))return byId['syd-stay'];
-    if(/trinity collective|트리니티 콜렉티브/.test(s))return byId['trinity-stay'];
+    if(/trinity collective|트리니티 콜렉티브/.test(s))return byId['armour-museum','Australian Armour & Artillery Museum · Smithfield 권역 근사 위치, 입구 아님',-16.85,145.70,'museum','CNS','area'],
+['trinity-stay'];
     if(/smithfield.*식료품/.test(s))return byId['smithfield-shop'];
     if(/smithfield.*식당/.test(s))return byId['smithfield-food'];
     if(/cairns aquarium|케언스 아쿠아리움/.test(s))return byId['cairns-aquarium'];
