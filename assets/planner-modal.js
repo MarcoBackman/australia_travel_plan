@@ -15,7 +15,7 @@
   let modal, frame, heading, fullPage, loading, opener, ready = false, requested, currentDocument='';
   function editorURL(embedded = false) {
     const url = new URL(requested.view==='map'?'route-map.html':'recommended-itinerary.html', location.href);
-    if (embedded) url.searchParams.set('embed', '1');url.searchParams.set('v','trinity-map-20260926-r4');
+    if (embedded) url.searchParams.set('embed', '1');url.searchParams.set('v','gantt-details-20260926');
     url.searchParams.set('view', requested.view);
     if (requested.day) url.searchParams.set('day', requested.day);
     return url.href;
