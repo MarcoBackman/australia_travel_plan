@@ -51,6 +51,46 @@
   const existing = window.tripInitialRows || [];
   window.tripInitialRows = existing.filter(r => r.day !== 14 && r.day !== 15 && !(r.day === 16 && r.start < '10:00') && !(r.day === 19 && r.start < '11:30')).concat(plan).sort((a, b) => a.day - b.day || a.start.localeCompare(b.start));
 
+  const sydneyHotel = 'Nesuto Chippendale · 47 Chippen Street';
+  const sydneyNote = '[시드니 숙소 최신 선택] 네수토 치펜데일, 스탠다드 스튜디오. 10/19~23 4박, 예약 화면 체크인 14:00부터·체크아웃 10:00까지. 시드니 렌터카 없음. 공항은 장비 적재 가능한 택시·차량 호출, 관광은 대중교통·도보 기본. 숙박 금액과 결제 완료 여부는 미제공.';
+  function sydneyPlan(items, day) {
+    return items.map(source => {
+      if (day < 19 || day > 23 || source.transport === '항공' || source.state === 'done' || (day === 19 && source.start < '17:25')) return {...source};
+      const item = {...source};
+      const original = item.title || '';
+      const fixPlace = text => (text || '').replace(/시드니 숙소|Sydney CBD 숙소|시드니 시내 숙소/g, sydneyHotel).replace(/Wynyard \/ Circular Quay/g, sydneyHotel);
+      item.place = fixPlace(item.place);
+      const addNote = text => { if (!(item.notes || '').includes(text)) item.notes = [item.notes, text].filter(Boolean).join('\n\n'); };
+      if (item.transport === '렌터카') { item.transport = '대중교통'; addNote('시드니에서는 렌터카를 사용하지 않습니다. 실제 노선·배차는 Transport for NSW에서 확인하고, 짐이 많거나 피곤하면 택시로 전환.'); }
+      if (day === 19 && /짐 수취.*시드니 숙소 체크인|짐 수취.*네수토/.test(original)) {
+        item.title = '짐 수취 · 택시 이동 · 네수토 치펜데일 체크인';
+        item.place = 'SYD 국내선 도착 터미널 → ' + sydneyHotel;
+        item.transport = '택시·차량 호출';
+        item.notes = (item.notes || '').replace('숙소 우선 비교: 윈야드 인근 Airbnb 1베드룸(25174383). 전체 숙소 300만원 상한, 도로 소음·19시 키 수령 확인 필요. 10/19~23 4박, 미예약. 장비 적재 차량으로 문 앞 이동·19시 입실 목표.', '');
+        addNote(sydneyNote);
+        addNote('JQ959 시드니 도착 17:25, 짐 수취·택시 후 19시 전후 입실 목표. 14시는 입실 가능한 시작 시각이지 실제 도착 시간이 아님. 늦은 도착·키 수령 방식을 사전에 호텔에 확인. 공항 송영은 제공되지 않으므로 직접 택시 또는 차량 호출.');
+      }
+      if (day === 19 && /숙소 근처 저녁/.test(original)) {
+        item.title = '치펜데일 숙소 근처 저녁 · 휴식'; item.place = 'Nesuto Chippendale 주변'; item.transport = '도보';
+        item.notes = (item.notes || '').replace('시간 고정 예약 없이 숙소 근처 식사. Circular Quay 근처 숙소이고 여유가 있을 때만 오페라하우스 외관 야경을 짧게 보기. 피곤하면 10/21 식물원 방문 앞뒤로 옮기기.', '도착일은 치펜데일 근처 식사와 휴식. 항구 야경을 위해 다시 이동하지 않기.');
+      }
+      if (day === 20 && /서큘러키 → 맨리|네수토 → 서큘러키 → 맨리/.test(original)) {
+        item.title = '네수토 → 서큘러키 → 맨리'; item.place = 'Nesuto Chippendale → Central/Redfern → Circular Quay → Manly Wharf';
+        if (item.state !== 'confirmed' && item.start === '09:00') item.start = '08:30';
+        item.transport = '대중교통'; addNote('호텔에서 역까지 도보·전철 이동 후 맨리행 페리 환승. 08:30~10:00은 이동·승선 대기 포함 계획값이며 실제 노선과 페리 시간표 확인. 택시로 서큘러키까지 이동하는 것도 대안.');
+      }
+      if (day === 21 && /왕립식물원/.test(original)) addNote('네수토에서 08:45 전후 출발하는 계획. 대중교통과 도보로 이동하고, 출발 전 실제 노선·보행 시간을 확인. 09:30 관람 시작에 늦으면 관람을 짧게 조정.');
+      if (day === 21 && /뉴타운/.test(original)) addNote('치펜데일 숙소를 기준으로 Redfern 경유 전철 또는 버스를 비교. 걷기 부담·피로가 크면 택시로 이동.');
+      if (day === 22 && /서리힐스/.test(original)) addNote('출발지는 네수토 치펜데일. 도보 또는 버스로 서리힐스 브런치에 이동. 이후 패딩턴·본다이는 기존 택시/대중교통 동선을 유지.');
+      if (day === 23 && /체크아웃.*공항 이동/.test(original)) {
+        item.place = sydneyHotel + ' → SYD 국제선 T1'; item.transport = '택시·차량 호출';
+        addNote('호텔 체크아웃 마감은 10:00이지만 12:40 TW502 탑승을 위해 기존 08:45 출발·09:40 T1 도착 목표 유지. 출발 전 키 반납, 장비 가방 적재 가능한 차량 사전 배차. 10시까지 숙소에 머무르는 일정이 아님.');
+      }
+      return item;
+    });
+  }
+  window.tripInitialRows = window.tripInitialRows.map(item => sydneyPlan([item], item.day)[0]);
+
   function mount() {
     const panel = document.createElement('section');
     panel.id = 'green-island-rental-plan';
@@ -100,10 +140,166 @@
       <button type="button" data-rental-apply>렌터카 확정·슈트 동선을 저장 일정에 적용</button>
       <button type="button" data-rental-restore>이 변경 직전 일정 복원</button>
       <p role="status" aria-live="polite" data-rental-status></p>`;
+    // Keep the source information, but separate the overview from detailed reading.
+    const sourceDetails = Array.from(panel.querySelectorAll(':scope > details'));
+    const sourceNotice = panel.querySelector('.rental-notice');
+    const applyButton = panel.querySelector('[data-rental-apply]');
+    const restoreButton = panel.querySelector('[data-rental-restore]');
+    const storageDescription = applyButton.previousElementSibling;
+    const liveStatus = panel.querySelector('[data-rental-status]');
+    const baseStyle = panel.querySelector('style');
+    const shell = document.createElement('div');
+    shell.innerHTML = `
+      <style>
+        #green-island-rental-plan{padding:22px;background:linear-gradient(125deg,#e9eee5,#faf5e9 65%,#f0e1cb);border-radius:20px}
+        #green-island-rental-plan .rental-eyebrow{font-size:11px;letter-spacing:.16em;font-weight:700;color:#51716a}
+        #green-island-rental-plan .rental-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+        #green-island-rental-plan .rental-heading h2{margin:4px 0 0;font-size:clamp(22px,4vw,30px)}
+        #green-island-rental-plan .rental-heading p{margin:0;font-size:13px;color:#55706a}
+        #green-island-rental-plan .rental-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+        #green-island-rental-plan button.rental-card{margin:0;padding:18px;text-align:left;background:#fffdf7;color:#193f3b;border:1px solid #ced9cc;border-radius:13px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;position:relative;transition:transform .18s,box-shadow .18s}
+        #green-island-rental-plan button.rental-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px #193f3b12}
+        #green-island-rental-plan .rental-card strong{font-size:25px;font-variant-numeric:tabular-nums;line-height:1.25}
+        #green-island-rental-plan .rental-card small{font-size:12px;color:#5b716a}
+        #green-island-rental-plan .rental-card .rental-date{font-size:12px;letter-spacing:.05em;font-weight:700}
+        #green-island-rental-plan .rental-chip{font-size:11px;padding:2px 8px;border-radius:20px;background:#e2eee5;color:#24594b}
+        #green-island-rental-plan .rental-chip.pending{background:#f5e6cf;color:#80591d}
+        #green-island-rental-plan .rental-card-foot{margin-top:auto;padding-top:8px;font-size:12px;color:#5b716a}
+        #green-island-rental-plan .rental-shortcuts{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:14px}
+        #green-island-rental-plan .rental-shortcuts button{background:transparent;color:#195b52;border-color:#bdccbd;margin:0;padding:8px 13px;font-size:13px}
+        #green-island-rental-plan .rental-shortcuts .rental-tip{font-size:12px;color:#5c706a;margin-left:auto}
+        #rental-info-dialog{box-sizing:border-box;width:min(800px,calc(100vw - 32px));max-width:none;max-height:86dvh;padding:0;border:1px solid #c6d4c7;border-radius:20px;background:#faf7ee;color:#193f3b;box-shadow:0 24px 100px #102b3a44;font:inherit;overflow:auto;overscroll-behavior:contain;line-height:1.7}
+        #rental-info-dialog::backdrop{background:#102f32a6;backdrop-filter:blur(5px)}
+        #rental-info-dialog .rental-dialog-head{position:sticky;top:0;z-index:2;background:#faf7ee;padding:18px 22px 0;border-bottom:1px solid #d9dfd2}
+        #rental-info-dialog .rental-dialog-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
+        #rental-info-dialog h2{font-size:22px;margin:0}
+        #rental-info-dialog button{font:inherit;cursor:pointer;min-height:44px;border-radius:8px;padding:9px 14px;border:1px solid #becdbf;background:#fffdf7;color:#195b52}
+        #rental-info-dialog button:focus-visible,#green-island-rental-plan button:focus-visible{outline:3px solid #b5613d;outline-offset:3px}
+        #rental-info-dialog .rental-tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 2px 12px}
+        #rental-info-dialog .rental-tabs button{white-space:nowrap;flex-shrink:0;font-size:13px}
+        #rental-info-dialog .rental-tabs button[aria-selected=true]{background:#195b52;color:white;border-color:#195b52}
+        #rental-info-dialog .rental-pane{padding:20px 22px}
+        #rental-info-dialog [hidden]{display:none!important}
+        #rental-info-dialog details{border:1px solid #d5ddce;border-radius:12px;padding:15px;margin:0 0 12px;background:#fffdf7}
+        #rental-info-dialog summary{font-weight:700;cursor:pointer;overflow-wrap:anywhere}
+        #rental-info-dialog p{font-size:14px;overflow-wrap:anywhere;margin:12px 0}
+        #rental-info-dialog a{color:#11665e;text-underline-offset:3px}
+        #rental-info-dialog .rental-notice{font-size:13px;border-left:3px solid #b77945;padding-left:12px}
+        #rental-info-dialog [data-rental-apply]{background:#195b52;color:white;margin:8px 8px 8px 0}
+        #rental-info-dialog .rental-budget{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+        #rental-info-dialog .rental-budget div{padding:18px;background:#e9eee2;border-radius:12px}
+        #rental-info-dialog .rental-budget strong{display:block;font-size:26px;line-height:1.4}
+        #rental-info-dialog .rental-budget small{display:block;font-size:12px}
+        #rental-info-dialog .rental-mini-route{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px;margin-bottom:16px;background:#e9eee2;border-radius:10px;font-size:13px}
+        @media(max-width:700px){#green-island-rental-plan .rental-cards{grid-template-columns:repeat(2,minmax(0,1fr))}#green-island-rental-plan button.rental-card{padding:14px}#green-island-rental-plan .rental-shortcuts button{width:auto}#green-island-rental-plan .rental-shortcuts .rental-tip{width:100%;margin:4px 0 0}#rental-info-dialog{width:calc(100vw - 16px);max-height:92dvh;border-radius:16px}#rental-info-dialog .rental-dialog-head{padding:14px 14px 0}#rental-info-dialog .rental-pane{padding:16px 14px}#rental-info-dialog .rental-budget{grid-template-columns:1fr}#rental-info-dialog [data-rental-apply],#rental-info-dialog [data-rental-restore]{width:100%;margin:6px 0}}
+        @media(prefers-reduced-motion:reduce){#green-island-rental-plan button.rental-card{transition:none}#green-island-rental-plan button.rental-card:hover{transform:none}}
+      </style>
+      <header class="rental-heading"><div><span class="rental-eyebrow">OCT 14 / 15 / 16 / 19</span><h2>이동과 바다, 한눈에</h2></div><p>카드를 누르면 상세 정보를 볼 수 있어요.</p></header>
+      <div class="rental-cards">
+        <button type="button" class="rental-card" data-rental-open="car" aria-haspopup="dialog"><span class="rental-date">10.14 · 렌터카 수령</span><strong>08:00</strong><span class="rental-chip">예약 완료</span><small>East Coast · i30 또는 동급</small><span class="rental-card-foot">차량 비용 412,668원 · 상세 보기 ↗</span></button>
+        <button type="button" class="rental-card" data-rental-open="suit" aria-haspopup="dialog"><span class="rental-date">10.14 → 10.16 · 슈트</span><strong>2벌 / 48시간</strong><span class="rental-chip pending">대여 예약 전</span><small>14일 10:30 수령 · 16일 09:00 반납</small><span class="rental-card-foot">2인 A$60 계획 · 업체 3곳 비교 ↗</span></button>
+        <button type="button" class="rental-card" data-rental-open="budget" aria-haspopup="dialog"><span class="rental-date">10.15 · 그린 아일랜드</span><strong>전일 크루즈</strong><span class="rental-chip pending">계획 선택 · 미예약</span><small>개인 장비 지참 · 섬에서 물놀이</small><span class="rental-card-foot">투어 2인 A$244 참고 · 준비 사항 ↗</span></button>
+        <button type="button" class="rental-card" data-rental-open="car" aria-haspopup="dialog"><span class="rental-date">10.19 · 렌터카 반납</span><strong>11:30 마감</strong><span class="rental-chip">예약 완료</span><small>11:00 반납 목표 → 공항 셔틀</small><span class="rental-card-foot">13:30 시드니행 · 이동 동선 ↗</span></button>
+      </div>
+      <nav class="rental-shortcuts" aria-label="예약 상세 정보"><button type="button" data-rental-open="car" aria-haspopup="dialog">렌터카·셔틀</button><button type="button" data-rental-open="suit" aria-haspopup="dialog">슈트 업체 비교</button><button type="button" data-rental-open="budget" aria-haspopup="dialog">예산·준비</button><button type="button" data-rental-open="saved" aria-haspopup="dialog">저장 일정 반영</button><span class="rental-tip">예약번호·개인정보는 공개하지 않습니다.</span></nav>
+      <dialog id="rental-info-dialog" aria-labelledby="rental-dialog-heading">
+        <div class="rental-dialog-head"><div class="rental-dialog-title"><h2 id="rental-dialog-heading">예약과 준비 상세</h2><button type="button" data-rental-close aria-label="상세 정보 닫기">닫기</button></div><div class="rental-tabs" role="tablist" aria-label="상세 정보 분류"><button type="button" id="rental-tab-car" role="tab" data-rental-tab="car" aria-controls="rental-pane-car" aria-selected="true">렌터카</button><button type="button" id="rental-tab-suit" role="tab" data-rental-tab="suit" aria-controls="rental-pane-suit" aria-selected="false" tabindex="-1">슈트 대여</button><button type="button" id="rental-tab-budget" role="tab" data-rental-tab="budget" aria-controls="rental-pane-budget" aria-selected="false" tabindex="-1">예산·준비</button><button type="button" id="rental-tab-saved" role="tab" data-rental-tab="saved" aria-controls="rental-pane-saved" aria-selected="false" tabindex="-1">저장 일정</button></div></div>
+        <div class="rental-pane" id="rental-pane-car" role="tabpanel" aria-labelledby="rental-tab-car" tabindex="0"><div class="rental-mini-route"><b>19일</b><span>09:30 숙소</span><span aria-hidden="true">→</span><span>주유</span><span aria-hidden="true">→</span><b>11:00 반납 목표</b><span aria-hidden="true">→</span><span>11:30 공항 도착 목표</span></div></div>
+        <div class="rental-pane" id="rental-pane-suit" role="tabpanel" aria-labelledby="rental-tab-suit" tabindex="0" hidden><p>가격·단품 대여 확인은 <b>Cairns Scuba Tech</b>. 이동을 줄이려면 섬 내 대여를 문의하세요. 각 후보를 눌러 조건을 비교할 수 있습니다.</p></div>
+        <div class="rental-pane" id="rental-pane-budget" role="tabpanel" aria-labelledby="rental-tab-budget" tabindex="0" hidden><div class="rental-budget"><div><small>렌터카 · 원화 항목 합계</small><strong>412,668원</strong><small>Protection 포함 · 실제 청구 확인</small></div><div><small>크루즈 + 슈트 · 2인 계획</small><strong>A$304</strong><small>식사·주차·유류비·보증금 별도</small></div></div></div>
+        <div class="rental-pane" id="rental-pane-saved" role="tabpanel" aria-labelledby="rental-tab-saved" tabindex="0" hidden></div>
+      </dialog>`;
+    const hotelCard = document.createElement('button');
+    hotelCard.type = 'button'; hotelCard.className = 'rental-card'; hotelCard.dataset.rentalOpen = 'sydney'; hotelCard.setAttribute('aria-haspopup', 'dialog');
+    hotelCard.innerHTML = '<span class="rental-date">10.19 → 10.23 · 시드니 숙소</span><strong>네수토 치펜데일</strong><span class="rental-chip">숙소 선택 완료 · 4박</span><small>스탠다드 스튜디오 · 시드니 렌터카 없음</small><span class="rental-card-foot">택시·대중교통 동선 보기 ↗</span>';
+    shell.querySelector('.rental-cards').append(hotelCard);
+    const hotelShortcut = document.createElement('button'); hotelShortcut.type = 'button'; hotelShortcut.dataset.rentalOpen = 'sydney'; hotelShortcut.setAttribute('aria-haspopup', 'dialog'); hotelShortcut.textContent = '시드니 숙소·교통';
+    shell.querySelector('.rental-shortcuts').insertBefore(hotelShortcut, shell.querySelector('.rental-tip'));
+    const dialog = shell.querySelector('dialog');
+    const hotelTab = document.createElement('button'); hotelTab.type = 'button'; hotelTab.id = 'rental-tab-sydney'; hotelTab.setAttribute('role', 'tab'); hotelTab.dataset.rentalTab = 'sydney'; hotelTab.setAttribute('aria-controls', 'rental-pane-sydney'); hotelTab.setAttribute('aria-selected', 'false'); hotelTab.tabIndex = -1; hotelTab.textContent = '시드니';
+    dialog.querySelector('.rental-tabs').append(hotelTab);
+    const hotelPane = document.createElement('div'); hotelPane.className = 'rental-pane'; hotelPane.id = 'rental-pane-sydney'; hotelPane.setAttribute('role', 'tabpanel'); hotelPane.setAttribute('aria-labelledby', 'rental-tab-sydney'); hotelPane.tabIndex = 0; hotelPane.hidden = true;
+    hotelPane.innerHTML = `
+      <div class="rental-budget"><div><small>10/19~10/23 · 4박</small><strong>네수토 치펜데일</strong><small>Nesuto Chippendale · 스탠다드 스튜디오</small></div><div><small>시드니 이동 원칙</small><strong>렌터카 없음</strong><small>공항은 택시 · 관광은 대중교통·도보</small></div></div>
+      <div class="rental-mini-route"><b>19일 17:25 도착</b><span>→ 짐 수취</span><span>→ 택시</span><b>→ 19시 전후 호텔 목표</b></div>
+      <details open><summary>숙소 주소·체크인</summary><p>예약 화면 주소: <b>47 Chippen Street, Chippendale, NSW 2008</b>. 공식 호텔 주소는 47–49 Chippen St로 안내됩니다. 체크인은 <b>10월 19일 14:00부터</b>, 체크아웃은 <b>10월 23일 10:00까지</b>입니다. 실제 입실은 항공편 도착 후 저녁이며 키 수령 방식을 미리 확인하세요.</p><p>사용자가 숙소를 선택한 상태로 반영했습니다. 숙박 금액·결제 완료 여부·취소 조건은 제공되지 않아 확정하지 않았습니다. 주방·세탁 시설·수영장 표시는 첨부 화면 기준입니다.</p><p><a href="https://www.nesuto.com/chippendale/faqs" target="_blank" rel="noopener">호텔 공식 안내</a> · <a href="https://www.google.com/maps/search/?api=1&query=Nesuto%20Chippendale%2047%20Chippen%20Street%20Sydney" target="_blank" rel="noopener">호텔 지도</a> · <a href="tel:+61296909690">+61 2 9690 9690</a></p></details>
+      <details><summary>날짜별 이동 방식</summary><p><b>19일:</b> SYD 국내선 → 장비 적재 가능한 택시·차량 호출 → 네수토. 저녁은 치펜데일 주변에서.</p><p><b>20일:</b> 숙소 → 대중교통으로 서큘러키 → 페리로 맨리. QVB·달링하버 방문 후 대중교통 또는 택시로 숙소 복귀.</p><p><b>21일:</b> 대중교통·도보로 왕립식물원과 미술관, 호텔에서 휴식 후 뉴타운. 당일 전철·버스 경로를 확인하세요.</p><p><b>22일:</b> 서리힐스는 도보·버스, 패딩턴·본다이는 피로도에 따라 택시와 대중교통 조합. 차량 주차 일정은 없습니다.</p><p><b>23일:</b> 08:45 호텔 출발 → 택시로 국제선 T1에 09:40 도착 목표 → 12:40 TW502. 호텔 체크아웃 마감 10시까지 기다리지 않습니다.</p><p>모든 이동 시간은 계획값이며 실제 교통·배차에 따라 조정합니다. <a href="https://transportnsw.info/trip" target="_blank" rel="noopener">Transport for NSW 경로 검색</a></p></details>
+      <details><summary>교통비·결제·장비 가방</summary><p>시드니 렌터카·주유·주차 비용은 새 계획의 대상이 아닙니다. 택시 요금은 차량 크기·시간대·교통에 따라 달라지므로 확정 금액을 넣지 않았습니다. 호텔은 자체 공항 송영을 제공하지 않습니다. 공항 택시 정액요금 적용 지역이라고 가정하지 말고 목적지를 제시해 확인하세요.</p><p>대중교통은 각자 별도의 Opal 또는 지원되는 비접촉 카드·기기를 사용하세요. 한 번의 여정에서는 같은 카드·기기로 승하차 태그하고, 실물 카드와 휴대폰을 섞어 쓰지 마세요. 공항 전철은 일반 운임 외 역 이용료가 있어 2인 총액을 택시와 비교합니다.</p><p>캐리어와 롱핀 가방을 고려해 택시·차량 호출 시 적재 가능 여부를 확인하세요. 기존 예산표의 수동 입력값은 임의로 삭제하지 않았으므로 시드니 차량 비용이 남아 있다면 제외하세요.</p><p><a href="https://transportnsw.info/contactless-help" target="_blank" rel="noopener">비접촉 결제 안내</a> · <a href="https://transportnsw.info/travel-info/using-public-transport/getting-to-airport" target="_blank" rel="noopener">공항 교통 안내</a></p></details>
+      <button type="button" data-sydney-apply>저장 일정에 시드니 숙소·교통 반영</button><button type="button" data-sydney-restore>시드니 변경 전 일정 복원</button><p role="status" aria-live="polite" data-sydney-status>기본 엑셀·간트에는 반영했습니다. 기존 저장 일정은 아래 확인 절차 후 변경됩니다.</p>`;
+    dialog.append(hotelPane);
+    const sydneyBackup = 'australia-before-nesuto-chippendale-20260926';
+    const hotelStatus = hotelPane.querySelector('[data-sydney-status]');
+    hotelPane.querySelector('[data-sydney-apply]').addEventListener('click', () => {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) { hotelStatus.textContent = '저장 일정이 없어 새 기본 동선이 적용됩니다.'; return; }
+        const data = JSON.parse(raw);
+        if (data.version !== 1 || !data.days || [19,20,21,22,23].some(day => !Array.isArray(data.days['2026-10-' + day]?.rows))) throw new Error('지원하지 않는 저장 형식입니다.');
+        if (!confirm('10/19~23의 숙소 관련 장소·교통 설명과 맨리 출발 계획을 갱신합니다. 항공편과 다녀옴 행, 다른 날짜·별도 메모는 유지하며 변경 전 전체 일정을 백업합니다. 편집 중인 일정은 먼저 저장하고 닫아주세요. 적용할까요?')) return;
+        for (const day of [19,20,21,22,23]) data.days['2026-10-' + day].rows = sydneyPlan(data.days['2026-10-' + day].rows, day);
+        localStorage.setItem(sydneyBackup, raw); data.updatedAt = new Date().toISOString(); localStorage.setItem(KEY, JSON.stringify(data)); location.reload();
+      } catch (error) { hotelStatus.textContent = '적용하지 못했습니다: ' + error.message; }
+    });
+    hotelPane.querySelector('[data-sydney-restore]').addEventListener('click', () => {
+      try {
+        const raw = localStorage.getItem(sydneyBackup);
+        if (!raw) { hotelStatus.textContent = '이 브라우저에는 시드니 변경 전 백업이 없습니다.'; return; }
+        if (!confirm('전체 일정을 시드니 변경 직전으로 복원합니다. 이후 편집한 내용이 되돌아갈 수 있습니다. 복원할까요?')) return;
+        const current = localStorage.getItem(KEY); if (current) localStorage.setItem(sydneyBackup + '-before-restore', current);
+        localStorage.setItem(KEY, raw); location.reload();
+      } catch (error) { hotelStatus.textContent = '복원하지 못했습니다: ' + error.message; }
+    });
+    const panes = Object.fromEntries(['car', 'suit', 'budget', 'saved', 'sydney'].map(key => [key, shell.querySelector('#rental-pane-' + key)]));
+    sourceDetails.forEach((detail, i) => {
+      const key = i === 0 ? 'car' : i === sourceDetails.length - 1 ? 'budget' : 'suit';
+      detail.open = key !== 'suit';
+      panes[key].append(detail);
+    });
+    panes.suit.append(sourceNotice);
+    panes.saved.append(storageDescription, applyButton, restoreButton, liveStatus);
+    panel.replaceChildren(baseStyle, ...Array.from(shell.childNodes));
+    // A body-level dialog also works when this page is shown inside the planner iframe.
+    document.body.append(dialog);
+    let returnFocus = null;
+    const tabs = Array.from(dialog.querySelectorAll('[data-rental-tab]'));
+    function selectTab(key) {
+      for (const tab of tabs) {
+        const selected = tab.dataset.rentalTab === key;
+        tab.setAttribute('aria-selected', String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+      }
+      for (const [name, pane] of Object.entries(panes)) pane.hidden = name !== key;
+      dialog.scrollTop = 0;
+    }
+    for (const button of panel.querySelectorAll('[data-rental-open]')) button.addEventListener('click', () => {
+      returnFocus = button;
+      selectTab(button.dataset.rentalOpen);
+      if (!dialog.open) dialog.showModal();
+      tabs.find(tab => tab.dataset.rentalTab === button.dataset.rentalOpen).focus();
+    });
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => selectTab(tab.dataset.rentalTab));
+      tab.addEventListener('keydown', event => {
+        let next;
+        if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault(); selectTab(tabs[next].dataset.rentalTab); tabs[next].focus();
+      });
+    });
+    dialog.querySelector('[data-rental-close]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => {
+      if (event.target !== dialog) return;
+      const rect = dialog.getBoundingClientRect();
+      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+    });
+    dialog.addEventListener('close', () => { if (returnFocus?.isConnected) returnFocus.focus(); });
     const host = document.querySelector('main') || document.body;
     host.prepend(panel);
-    const status = panel.querySelector('[data-rental-status]');
-    panel.querySelector('[data-rental-apply]').addEventListener('click', () => {
+    const status = liveStatus;
+    applyButton.addEventListener('click', () => {
       try {
         const raw = localStorage.getItem(KEY);
         if (!raw) { status.textContent = '저장 일정이 없어 기본 일정이 적용됩니다. 엑셀·간트 페이지에서 확인하세요.'; return; }
@@ -131,7 +327,7 @@
         location.reload();
       } catch (error) { status.textContent = '적용하지 못했습니다: ' + error.message + ' 현재 일정·메모 내보내기로 먼저 백업하세요.'; }
     });
-    panel.querySelector('[data-rental-restore]').addEventListener('click', () => {
+    restoreButton.addEventListener('click', () => {
       try {
         const raw = localStorage.getItem(BACKUP);
         if (!raw) { status.textContent = '이 브라우저에는 대여 동선 적용 전 백업이 없습니다.'; return; }
