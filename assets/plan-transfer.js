@@ -14,6 +14,25 @@
     }
     return {format: FORMAT, version: 1, exportedAt: stamp(), source: location.protocol === 'file:' ? 'local-file' : location.origin, entries};
   }
+  function exportSnapshot() {
+    const value = snapshot();
+    const planKey = 'australia-recommended-portdouglas-2026-v1';
+    const canReadVisible = typeof window.tripRowsForTransfer === 'function';
+    // Export what the home cards display, including the unsaved default itinerary.
+    // The rollback snapshot above deliberately remains an exact storage copy.
+    if (canReadVisible || (!value.entries[planKey] && Array.isArray(window.tripInitialRows))) {
+      const plan = value.entries[planKey] ? JSON.parse(value.entries[planKey]) : {version: 1, days: {}};
+      if (!plan.days || typeof plan.days !== 'object' || Array.isArray(plan.days)) throw Error('저장된 일정 형식을 읽지 못했습니다. 원본을 보호하기 위해 내보내기를 중단했습니다.');
+      for (let day = 13; day <= 23; day++) {
+        const date = '2026-10-' + day;
+        const result = canReadVisible ? window.tripRowsForTransfer(day).list : window.tripInitialRows.filter(row => row.day === day);
+        if (!Array.isArray(result)) throw Error('화면의 날짜별 일정을 읽지 못했습니다.');
+        plan.days[date] = {...plan.days[date], rows: result.map((row, index) => ({...row, id: row.id || 'export-' + date + '-' + index}))};
+      }
+      value.entries[planKey] = JSON.stringify(plan);
+    }
+    return value;
+  }
   function validate(value) {
     if (!value || value.format !== FORMAT || value.version !== 1 || !value.entries || typeof value.entries !== 'object' || Array.isArray(value.entries)) throw Error('이 기능에서 내보낸 일정·메모 파일을 선택해 주세요.');
     const entries = Object.entries(value.entries);
@@ -68,9 +87,9 @@
   dialog.setAttribute('aria-labelledby', 'plan-transfer-title');
   dialog.innerHTML = `<header class="plan-transfer-head"><h2 id="plan-transfer-title">일정·메모 옮기기</h2><button type="button" class="btn" data-close aria-label="일정 옮기기 닫기">닫기</button></header>
     <p class="plan-transfer-note">로컬 파일과 공개 사이트의 개인 저장 내용은 자동으로 동기화되지 않습니다. 먼저 각 편집창에서 저장을 마친 뒤, <strong>내용이 맞는 쪽에서 내보내고 다른 쪽에서 가져오세요.</strong></p>
-    <p data-environment></p>
+    <p data-environment></p><p class="fine">내보내기 버전 3 · 기본 일정 포함</p>
     <h3>1. 현재 일정·메모 내보내기</h3>
-    <p>저장된 일정, 개인 메모와 아이콘 위치, 지도 지정 위치, 예산 등 이 여행 사이트의 저장 항목을 JSON 파일 하나로 내려받습니다. 현재 페이지에서 접근 가능한 저장 내용만 포함됩니다.</p>
+    <p>현재 화면의 일정(아직 저장하지 않은 기본 추천안 포함), 저장된 개인 메모와 아이콘 위치, 지도 지정 위치, 예산을 함께 내보냅니다. 편집창에서 아직 저장하지 않은 입력과 다른 페이지에서만 접근 가능한 메모는 포함되지 않을 수 있습니다.</p>
     <button class="btn primary" type="button" data-export>현재 일정·메모 내보내기</button>
     <section class="plan-transfer-note" data-export-result hidden><h3>내보내기 데이터 준비됨</h3><p data-export-filename></p><p>파일이 저장되지 않았다면 아래에서 저장을 다시 시도하거나, 데이터를 복사해 공개 사이트의 ‘텍스트로 가져오기’에 붙여넣으세요. 이 내용은 개인 자료이므로 공개 댓글에 올리지 마세요.</p><label>내보낼 일정·메모<textarea data-export-text readonly rows="6" spellcheck="false" style="box-sizing:border-box;width:100%;font:12px monospace"></textarea></label><div class="plan-transfer-actions"><button class="btn" type="button" data-save-file>파일 저장 다시 시도</button><button class="btn" type="button" data-copy>일정·메모 데이터 복사</button></div></section>
     <h3>2. 다른 쪽에서 파일 가져오기</h3>
@@ -105,13 +124,17 @@
   dialog.addEventListener('close', () => opener.focus());
   get('reload').addEventListener('click', () => location.reload());
   get('export').addEventListener('click', () => {
+    const button = get('export');
+    button.disabled = true; button.textContent = '일정·메모 준비 중…';
+    say('현재 화면의 일정과 저장된 개인 메모를 읽고 있습니다.');
     try {
-      const value = snapshot();
-      if (!Object.keys(value.entries).length) { say('현재 페이지에서 읽을 수 있는 저장 내용이 없습니다. 일정을 편집한 페이지에서 내보내세요.'); return; }
+      const value = exportSnapshot();
+      if (!Object.keys(value.entries).length) { say('현재 페이지에서 일정 데이터를 불러오지 못했습니다. 첫 화면을 다시 열어 주세요. 저장 내용은 변경하지 않았습니다.'); return; }
       download(value, 'australia-private-plan-' + stamp().slice(0, 10) + '.json');
       say('내보내기 데이터를 준비했습니다. 다운로드가 안 됐다면 아래의 데이터 복사 또는 파일 저장 다시 시도를 이용하세요.');
       get('export-result').scrollIntoView({block: 'nearest'});
-    } catch { say('브라우저 저장 내용에 접근하지 못했습니다. 개인정보 보호 설정을 확인하세요.'); }
+    } catch (error) { say('내보내기를 완료하지 못했습니다: ' + (error.message || '브라우저 저장 내용에 접근할 수 없습니다.')); }
+    finally { button.disabled = false; button.textContent = '현재 일정·메모 내보내기'; }
   });
   get('save-file').addEventListener('click', async () => {
     if (!exportValue) return;

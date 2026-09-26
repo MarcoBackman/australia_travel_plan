@@ -3,6 +3,7 @@
   const key='australia-recommended-portdouglas-2026-v1',strip=document.getElementById('home-day-strip');
   const titles=['출국·환승','도착·회복','프리다이빙','아쿠아리움·식물원','외해 스노클링','수영·박물관','시드니 이동','맨리·도심','미술관·동네','본다이 산책','귀국'];
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  window.tripRowsForTransfer=rows;
   function rows(day){
     const result=storedRows(day);
     if(day!==14)return result;
