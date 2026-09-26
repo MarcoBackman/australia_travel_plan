@@ -15,7 +15,7 @@
   let modal, frame, heading, fullPage, loading, opener, ready = false, requested, currentDocument='';
   function editorURL(embedded = false) {
     const url = new URL(requested.view==='map'?'route-map.html':'recommended-itinerary.html', location.href);
-    if (embedded) {url.searchParams.set('embed', '1');url.searchParams.set('v','minimap-20260914');}
+    if (embedded) url.searchParams.set('embed', '1');url.searchParams.set('v','trinity-map-20260926-r4');
     url.searchParams.set('view', requested.view);
     if (requested.day) url.searchParams.set('day', requested.day);
     return url.href;
@@ -35,7 +35,7 @@
     modal.id = 'planner-modal';
     modal.className = 'planner-modal';
     modal.setAttribute('aria-labelledby', 'planner-modal-title');
-    modal.innerHTML = '<header class="planner-modal-head"><div><p>10.13—10.23 · PORT DOUGLAS & SYDNEY</p><h2 id="planner-modal-title"></h2></div><a class="planner-full-page">전체 페이지 ↗</a><button type="button" class="dialog-close" aria-label="일정 모달 닫기" autofocus>×</button></header><p class="planner-loading" role="status">저장된 일정을 불러오는 중입니다. 열리지 않으면 전체 페이지에서 확인해 주세요.</p><iframe title="여행 일정표와 간트차트 편집기"></iframe>';
+    modal.innerHTML = '<header class="planner-modal-head"><div><p>10.13—10.23 · CAIRNS & SYDNEY</p><h2 id="planner-modal-title"></h2></div><a class="planner-full-page">전체 페이지 ↗</a><button type="button" class="dialog-close" aria-label="일정 모달 닫기" autofocus>×</button></header><p class="planner-loading" role="status">저장된 일정을 불러오는 중입니다. 열리지 않으면 전체 페이지에서 확인해 주세요.</p><iframe title="여행 일정표와 간트차트 편집기"></iframe>';
     heading = modal.querySelector('h2');
     frame = modal.querySelector('iframe');
     fullPage = modal.querySelector('a');

@@ -27,7 +27,34 @@
   const routeColors={flight:'#e8b674',sea:'#67c1e2',walk:'#98dcae',drive:'#d6db8e',transit:'#bbafd9',link:'#b1c7c7'};
   const modeNames={flight:'항공 · 개략선',sea:'보트·페리 · 개략선',walk:'도보',drive:'차량',transit:'대중교통 · 개략선',link:'일정 사이 연결'};
   let day=D.dates.includes(params.get('day'))?params.get('day'):params.get('day')==='all'?'all':D.dates[1];
-  let state=D.read(),pins=D.readPins(),events=[],legs=[],selected=0,map=null,routeLayer,poiLayer,markerLayer,playing=null,epoch=0,requestController=null,lastRequest=0,pinOpener=null;
+  function readCurrentMapState(){
+    const source=D.read(),days={...source.days};
+    for(const date of D.dates){
+      const number=Number(date.slice(-2));
+      if(number<14||number>19||!Array.isArray(days[date]))continue;
+      days[date]=days[date].map(original=>{
+        if(number===19&&original.startZone!=='CNS')return original;
+        const oldStay=/포트\s*더\s*글라스\s*숙소|port\s*douglas\s*(?:stay|hotel)|케언스\s*시내\s*숙소/i;
+        const isArrival=number===14;
+        let row={...original};
+        if(oldStay.test((row.title||'')+' '+(row.place||''))&&typeof window.tripTrinityAdjust==='function')row=window.tripTrinityAdjust(number,row);
+        const fix=value=>{
+          if(typeof value!=='string')return value;
+          let next=value.replace(/포트\s*더\s*글라스\s*숙소(?:\s*권역)?|port\s*douglas\s*(?:stay|hotel)|케언스\s*시내\s*숙소(?:\s*권역)?/gi,'Trinity Collective');
+          if(isArrival)next=next.replace(/포트\s*더\s*글라스|port\s*douglas/gi,'Trinity Beach');
+          return next;
+        };
+        row.title=fix(row.title);row.place=fix(row.place);
+        if(typeof row.place==='string'){
+          row.place=row.place.replace(/(^|[→·]\s*)숙소(?=\s*(?:$|[→·]))/g,'$1Trinity Collective');
+          if(/숙소|체크인|체크아웃|입실/.test(row.title||''))row.place=row.place.replace(/^포트\s*더\s*글라스(?:\s*(?:중심부|권역))?$/,'Trinity Collective');
+        }
+        return row;
+      });
+    }
+    return {...source,days};
+  }
+  let state=readCurrentMapState(),pins=D.readPins(),events=[],legs=[],selected=0,map=null,routeLayer,poiLayer,markerLayer,playing=null,epoch=0,requestController=null,lastRequest=0,pinOpener=null;
   let lastSignature='',selectedSignature='',pointMarkers=new Map(),routeCache=new Map(),routeLines=[],cameraReady=false,cameraMotion=null;
   const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
   const coord=p=>[p.lat,p.lng],quality=p=>p.quality==='custom'?'직접 지정':p.quality==='area'?'권역 대표 · 장소 미확정':'대표 위치';
@@ -91,7 +118,7 @@
     }
     if($('map-poi').getAttribute('aria-pressed')==='true'){
       const zones=new Set(allPoints().map(p=>p.zone));
-      for(const point of D.places){if(grouped.has(point.id)||!zones.has(point.zone))continue;
+      for(const point of D.places){if(grouped.has(point.id)||!zones.has(point.zone))continue;if(point.zone==='CNS'&&point.kind==='stay'&&/포트|port\s*douglas/i.test(point.name))continue;
         const marker=L.marker(coord(point),{title:'주요 장소 · '+point.name,alt:point.name,icon:L.divIcon({className:'map-pin-icon',html:markerHTML(point,[],true),iconSize:[25,25],iconAnchor:[12,12]}),zIndexOffset:0}).addTo(poiLayer);
         const popup=document.createElement('div');const b=document.createElement('b');b.textContent=point.name;const small=document.createElement('small');small.textContent=quality(point)+' · 오늘 일정에 포함된 장소는 아닙니다.';popup.append(b,small);marker.bindPopup(popup);
       }
@@ -133,7 +160,7 @@
     if(manual)stopPlayback();invalidateRequest();selected=Math.max(0,Math.min(events.length-1,Number(index)||0));const event=events[selected];
     if(event){selectedSignature=event.key;$('map-selected-time').textContent=(day==='all'?event.date.slice(5)+' · ':'')+(event.start||'시각 미정')+' → '+endLabel(event);$('map-selected-title').textContent=event.title||'제목 없는 일정';$('map-selected-place').textContent=event.place||'장소 미지정';
       const stateName={confirmed:'예약 완료',pending:'확인 필요',done:'다녀옴',draft:'계획 중'}[event.state]||'계획 중';
-      $('map-selected-tags').innerHTML='<span>'+stateName+'</span><span>'+esc(event.transport||'미정')+'</span><span>'+esc(event.startZone==='KR'?'한국·일본 UTC+9':event.startZone==='CNS'?'포트더글라스·CNS UTC+10':'시드니 UTC+11')+(event.startZone!==event.endZone?' → '+esc(event.endZone==='SYD'?'SYD UTC+11':event.endZone==='KR'?'한국 UTC+9':'CNS UTC+10'):'')+'</span>';
+      $('map-selected-tags').innerHTML='<span>'+stateName+'</span><span>'+esc(event.transport||'미정')+'</span><span>'+esc(event.startZone==='KR'?'한국·일본 UTC+9':event.startZone==='CNS'?'케언스·Trinity Beach UTC+10':'시드니 UTC+11')+(event.startZone!==event.endZone?' → '+esc(event.endZone==='SYD'?'SYD UTC+11':event.endZone==='KR'?'한국 UTC+9':'CNS UTC+10'):'')+'</span>';
     }else{$('map-selected-time').textContent='—';$('map-selected-title').textContent='등록된 일정이 없습니다';$('map-selected-place').textContent='';$('map-selected-tags').replaceChildren();selectedSignature='';}
     document.querySelectorAll('.map-event').forEach((b,i)=>{if(i===selected)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
     $('map-progress').value=selected;$('map-step-count').textContent=(event?selected+1:0)+' / '+events.length;highlightSelection();describeRoute();
@@ -149,14 +176,14 @@
     $('map-day').value=day;$('map-prev-day').disabled=day===D.dates[0];$('map-next-day').disabled=day===D.dates.at(-1);
     $('map-day-title').textContent=day==='all'?'11일의 여행 경로':Number(day.slice(-2))+'일의 이동 순서';$('map-event-count').textContent=String(events.length).padStart(2,'0');$('map-empty').hidden=!!events.length;
     $('map-progress').max=Math.max(0,events.length-1);renderList();drawRoutes();drawMarkers();const found=keepSelection?events.findIndex(e=>e.key===old):-1;selectEvent(keepSelection?(found>=0?found:oldIndex):0,false);
-    const points=allPoints();fit(points.length?points:[{lat:-16.4837,lng:145.4639}],points.length?15:12);
+    const points=allPoints();fit(points.length?points:[{lat:-16.802,lng:145.690}],points.length?15:12);
     const missing=events.filter(e=>e.stops.some(s=>!s.point)).length;
     $('map-warning').textContent=[state.error,missing?missing+'개 일정에 미정 위치가 있습니다. 리프 포인트·지정 선착장은 예약서 확인 후 위치를 지정하세요.':'숙소·식당 권역의 핀은 대표 위치이며 예약 확정 장소가 아닙니다.'].filter(Boolean).join(' ');
     $('map-sync-status').textContent=state.error?'기본안 포함 · 확인 필요':state.usesSaved?'저장된 일정 연결됨':'기본 추천 일정 연결됨';
     post({type:'australia-recommended-state',view:'map',day});
   }
   function setDay(value){if(value!=='all'&&!D.dates.includes(value))return;day=value;const url=new URL(location.href);url.searchParams.set('day',day);history.replaceState(null,'',url);renderDay();}
-  function refresh(){const next=D.read(),nextPins=D.readPins(),signature=JSON.stringify([next,nextPins]);if(signature===lastSignature)return;lastSignature=signature;state=next;pins=nextPins;renderDay(true);$('map-sync-status').textContent=state.error?'일정 읽기 확인 필요':'일정 갱신됨 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});}
+  function refresh(){const next=readCurrentMapState(),nextPins=D.readPins(),signature=JSON.stringify([next,nextPins]);if(signature===lastSignature)return;lastSignature=signature;state=next;pins=nextPins;renderDay(true);$('map-sync-status').textContent=state.error?'일정 읽기 확인 필요':'일정 갱신됨 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});}
   function details(){
     const e=events[selected];if(!e)return;
     const body=document.createElement('div');body.innerHTML='<span class="tag '+(e.state==='confirmed'?'confirmed':'proposed')+'">'+esc(e.date)+' · '+esc(e.start)+' → '+esc(endLabel(e))+'</span><div class="map-detail-points">'+e.stops.map(s=>'<span>'+esc(s.text)+'<br><small>'+esc(s.point?quality(s.point):'위치 미정')+'</small></span>').join('<span aria-hidden="true">→</span>')+'</div><p>'+esc(e.notes||'추가 메모가 없습니다.').replace(/\n/g,'<br>')+'</p><p class="fine">각 시작·도착 도시의 현지 시각입니다. 점선은 순서를 확인하는 연결선입니다.</p>';
